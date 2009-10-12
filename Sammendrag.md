@@ -135,4 +135,134 @@ Wired Equivalent Privacy.
 Mål i 1999-standarden inkluderer rimelig sterk, selvsynkronisering, effektiv og eksporterbar. Standarden spesifiserte 40-bits nøkler, men en ikke-standard utvidelse bruker 104 bit. Definerte også to typer sikkerhet: åpent (dvs ingen sikkerhet) og delt nøkkel.
 
 * Autentiseringsfase. Bevise sin identitet til hverandre. Problem: ingen hemmelig token, altså ingen måte å vite at etterfølgende meldinger kommer fra samme enhet. Meningsløst. Med delt nøkkel er målet at mobil enhet skal vise at den har nøkkelen. AP sender plaintext, får tilbake ciphertext. Snilt for hackere.
-* Krypteringsfase. Benytter RC4. Enkel å implementere. Rask. Initialisering og kryptering skjer på hver pakke. 24 bit til initialisering.
+* Krypteringsfase. Benytter RC4. Enkel å implementere. Rask. Initialisering og kryptering skjer på hver pakke. 24 bit til initialiseringsvektor (IV). IV endres for hver pakke, og sendes sammen med pakken. Gjør at samme plaintext gir forskjellige ciphertext. Nøkkel til RC4 er sammensatt av hemmelig nøkkel og IV. Problemet er at IV aldri bør brukes mer enn én gang per nøkkel. I WEP er det 24 bit, dvs ca 17 mill IV-verdier. Mange systemer starter med samme IV etter oppstart, og benytter et pseudorandom bytte.
+
+Hva er forskjellen på default keys og key mapping keys?
+-------------------------------------------------------
+
+Dette er de to typene nøkler som er nevnt i standarden. Begge to har bestemt lengde (Vanligvis 40 eller 104 bit), og er statiske, delte og symmetriske.
+
+Distribuering av nøkler er ikke en del av 802.11-standarden.
+
+### Default
+
+Når alle mobile enheter og AP-en har samme sett med nøkler, kaller vi disse _default keys_. Opp til fire nøkler per enhet. Kun én trengs for at sikkerhet skal fungerere, mens flere støttes slik at man kan endre nøkler jevnt. Dette fungerer på følgende måte: Når det er flere nøkler spesifisert, benyttes aktiv nøkkel til å kryptere sendingen, mens mottakeren kan dekryptere ved å benytte hvilken som helst av nøklene. Egentlig trenger man bare to nøkler for dette, men med fire nøkler kan man ha _directional key use_ — altså to tilgjengelig i hver retning.
+
+### Key mapping
+
+Når alle mobile enheter har sin unike nøkkel mot AP-en, kaller vi disse _key mapping keys_. Mer komplekst å konfigurere og vedlikeholde. Spesielt gjelder dette AP, som nå må inneholde alle nøkler som er i bruk.
+
+Komplikasjon i forhold til broadcast. All multicast-trafikk sendes ved å benytte _default key_. Trenger dermed å legge inn to nøkler i hver enhet.
+
+Hva skjer med en melding før den sendes i WEP-protokollen?
+----------------------------------------------------------
+
+Først ankommer en pakke IEEE 802.11 MAC tjenestelaget. Denne kalles MSDU (MAC service data unit). Denne kan bli delt i mindre deler før sending (fragmentering). Hvert fragment blir så en pakke som kalles MPDU (MAC protocol data unit). WEP-kryptering gjøres på MPDU.
+
+* _Integrity check value_ (ICV) gjør at pakken ikke skal kunne endres under transport.
+* Nøkkelnummer og IV sendes ukryptert, slik at mottakeren vet hvordan meldingen skal dekrypteres.
+
+[wep-message.png](WEP message, nesten klar)
+
+I tillegg til dette
+
+* _Cyclic Redundancy Check_ (CRC) legges til for å oppdage transmisjonsfeil.
+* MAC header legges til for destinasjon.
+
+Hvordan fungerer RC4?
+---------------------
+
+Samme algoritme til kryptering og dekryptering. Enkel å implementere samtidig som den er sterk. Feilene i WEP stammer fra måten WEP benytter RC4, ikke at algoritmen er svak.
+
+Grunnleggende idé: Generer pseudorandom sekvens (key stream) som XOR-es med datastrømmen. Utfordringen er å lage en god strøm med pseudorandom tall.
+
+Hvorfor IV i WEP?
+-----------------
+
+Nøkkelen som benyttes sier hvilken tilstand RC4 skal starte i. Uten et salt (her IV) vil den være statisk, og dermed alltid starte i samme tilstand. Altså veldig enkelt å finne samme tekst i forskjellige pakker. Ved å benytte IV, startes RC4 i forskjellig tilstand.
+
+Hvorfor er ikke WEP sikker?
+---------------------------
+
+Mekanismer som trengs for et sikkert system, og hvorfor WEP feiler:
+
+### Authentication
+
+* Robust metode for å bevise identitet, og som ikke kan forfalskes. Problem: Under autentisering sendes en random 128 bytes streng fra AP til mobil enhet. Den mobile enheten krypterer denne, og sender den tilbake til AP. Problemet er da at plaintext og ciphertext er sendt, slik at en som lytter på samtalen enkelt kan finne de random bytes-ene som benyttes til å kryptere. Vet da _key stream_ som korresponderer til gitt IV.
+* Metode for å bevare identiteten over etterfølgende transaksjoner, og som ikke kan overføres. Problem: Ikke implementert i det hele tatt.
+* Gjensidig autentisering. Problem: Mobil enhet autentiseres hos AP, men ikke motsatt.
+* Autentiseringsnøkkel er uavhengig av krypteringsnøkkel. Problem: WEP bruker samme for begge.
+
+### Access Control
+
+IEEE 802.11 spesifiserer ikke hvordan aksesskontroll implementeres. Men identifikasjon gjøres på MAC-adresser, noe som kan gi en enkel form for aksesskontroll (MEN MAC-adresser kan enkelt forfalskes).
+
+### Replay prevention
+
+WEP har ingen beskyttelse, eksisterer rett og slett ikke standarden.
+
+### Message modification detection
+
+WEP inkluderer ICV, som skal øke beskyttelsen av ciphertext-en. MEN: CRC-metoden som benyttes for å beregne ICV er lineær, altså er det mulig å anslå hvikle bit i ICV som endres når man endrer et enkelt bit i meldingen. WEP sikrer selve verdien, men det er mulig å forutsigbart endre enkeltbits.
+
+### Message privacy
+
+Altså angrep på selve krypteringsmåten i WEP. To mål: få tak i nøkkelen eller dekode meldingen. 
+
+Tre svakheter i måten WEP benytter RC4:
+
+* IV Reuse. Ved å ha lik IV i flere pakker har samme problem som dersom man har null salt i det hele tatt. RC4 vil dermed starte i samme tilstand.
+  
+  [iv-reuse-problem.png](IV Reuse Problem)
+
+  Som vi ser kan angriperen benytte det faktum at IV er lik i begge tilfeller til å finne plaintext som er XOR-et med plaintext. Det gir ikke mye i seg selv, men kan benyttes sammen med det faktum at IP-adressen i mange nettverk er rimelig spesifisert, osv. Jo mer data man vet om pakkene, jo mer plaintext kan man finne.
+* RC4 Weak Keys. For noen nøkler vil for mange bits i de første bytes-ene i nøkkelstrømmen (pseudorandom bytes) være bestemt av noen få bit i nøkkelen selv. Altså: noen bit i nøkkelen har større effekt enn andre, mens andre har null effekt. Dette er kun i begynnelsen, fram til RC4 "kommer igang". Kan løse dette ved å forkaste de første 256 bytes.
+* Direct Key Attacks.
+
+Hva er forholdet mellom Wi-Fi og IEEE 802.11?
+---------------------------------------------
+
+Som følge av at IEEE 802.11 er en lang og kompleks standard, har Wi-Fi Alliance laget en test basert på IEEE 802.11 som produsent må gjennom for å få Wi-Fi sertifisering. Slik kan man garantere at alle enheter som har blitt sertifisert faktisk fungerer sammen.
+
+Hva er RSN?
+-----------
+
+IEEE 802.11i definerer en ny type trådløst nettverk, kalt Robust Security Network (RSN). IEEE 802.11i definerer også en Transitional Security Network (TSN) der RSN- og WEP-systemer kan operere i parallell.
+
+Hva er WPA?
+-----------
+
+Siden det ville ta lang tid å innføre en ny standard etter man innså at WEP ikke var sikker, lagde IEEE 802.11i en erstatning som fungerte med funksjonaliteten i eksiterende Wi-Fi-produkter — Wi-Fi Protected Access (WPA). Spesifiserte her Temporal Key Integrity Protocol (TKIP), som er tillatt som en valgfri modus i RSN.
+
+Hva er forskjellen på WPA og RSN?
+---------------------------------
+
+Deler arkitektur og tilnærming. WPA har et subset av funksjonaliteten, fokusert på en måte å implementere et nettverk. RSN har støtte for AES i tillegg til TKIP. 
+
+Både RSN og WPA fungerer i infrastruktur modus, mens kun RSN fungerer i ad-hoc modus (dvs ingen aksesspunkter). Ad-hoc modus kalles noen ganger IBSS (Independent Basic Service Set) modus. 
+
+Hva er en sikkerhetskontekst (security context)?
+------------------------------------------------
+
+I forhold til WEP, er brukerautentisering og beskyttelse av meldinger separert. Dette gjør at systemet enklere kan skaleres opp til mange brukere. Disse delene kobles sammen i en sikkerhetskontekst (og dermed også på WPA). (Pass-analogi på side 108). Basis: autentiseringsprosesess etterfulgt av en tidsbegrenset sikkerhetskontekst. 
+
+To typer nøkler:
+
+* Master key. Benyttes til autentisering. 
+* Temporal keys. Lages etter autentisering. Er en del av sikkerhetskonteksten. Benyttes til alle operasjoner etter autentisering, istedet for å benytte master key.
+
+Hvilke lag finnes i IEEE802.11i-standarden?
+-------------------------------------------
+
+Benytter samme lag som enhver LAN-relatert løsning. Dette gjør at RSN passer inn i eksiterende sikkerhetsarkitekturer.
+
+* Wireless LAN Layer. Behandler rå kommunikasjon, annonserer funksjonalitet og aksepterer applikasjoner som ønsker å koble til nettverket. Ansvarlig for kryptering og dekryptering.
+* Access Control Layer. "Middle manager". Administrerer sikkerhetskontekst. Holder oversikt over hvem som er autentisert, slik at kun de rette brukerne har tilgang. Snakker med autentiseringslaget for å finne ut når den skal åpne en sikkerhetskontekst. Medvirker i å lage temporære nøkler.
+* Authentication Layer. Beslutninger gjøres her. Identitering godkjennes eller avslås. Delegerer ansvar til Access Control Layer når den har autentisert bruker.
+
+Wireless LAN er alltid i AP. Access Control er vanligvis i AP. Authentication er gjerne i AP i små systemer, men i en egen autentiseringsserver i større systemer. 
+
+IEEE802.11 dekker kun Wireless LAN. Access Control benytter 802.11X. IEEE 802.11i spesifiserer ingen obligarisk autentiseringsmetode, men RSN ble designet slik at man selv kan bestemme ønsket metode. 
+
+[main-standards-rsn.png](Main Standards in an RSN Solution Based on TLS)
+
