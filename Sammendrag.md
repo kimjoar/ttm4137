@@ -23,7 +23,7 @@ Begreper
 
 The traditional approach for network security is to divide the network into two zones: trusted and untrusted. There is no need for network security protection within the trusted zone because there are no enemies present. By contrast, you regard the untrusted zone as full of enemies.
 
-[conventional-security-architecture.png](Conventional Security Architecture)
+[http://github.com/kjbekkelund/ttm4137/raw/master/conventional-security-architecture.png](Conventional Security Architecture)
 
 How does Wi-Fi LAN fit into this conventional security architecture?
 
@@ -110,7 +110,7 @@ Forklar MAC (header) i IEEE 802.11
 
 MAC-headeren er en del av det generelle formatet på rammer i IEEE 802.11.
 
-[basic-frame-format-802-11.png](Generelt format på rammer i IEEE 802.11)
+[http://github.com/kjbekkelund/ttm4137/raw/master/basic-frame-format-802-11.png](Generelt format på rammer i IEEE 802.11)
 
 Tre typer basert på om det er snakk om en kontrollramme, styringsramme eller dataramme. Viktigste del: adresser. 6 byte per adresse. Hver enhet har en unik adresse spesifisert under produksjon. Destinasjon kan være unikast eller multikast.
 
@@ -162,7 +162,7 @@ Først ankommer en pakke IEEE 802.11 MAC tjenestelaget. Denne kalles MSDU (MAC s
 * _Integrity check value_ (ICV) gjør at pakken ikke skal kunne endres under transport.
 * Nøkkelnummer og IV sendes ukryptert, slik at mottakeren vet hvordan meldingen skal dekrypteres.
 
-[wep-message.png](WEP message, nesten klar)
+[http://github.com/kjbekkelund/ttm4137/raw/master/wep-message.png](WEP message, nesten klar)
 
 I tillegg til dette
 
@@ -207,13 +207,14 @@ WEP inkluderer ICV, som skal øke beskyttelsen av ciphertext-en. MEN: CRC-metode
 
 ### Message privacy
 
+
 Altså angrep på selve krypteringsmåten i WEP. To mål: få tak i nøkkelen eller dekode meldingen. 
 
 Tre svakheter i måten WEP benytter RC4:
 
 * IV Reuse. Ved å ha lik IV i flere pakker har samme problem som dersom man har null salt i det hele tatt. RC4 vil dermed starte i samme tilstand.
   
-  [iv-reuse-problem.png](IV Reuse Problem)
+  [http://github.com/kjbekkelund/ttm4137/raw/master/iv-reuse-problem.png](IV Reuse Problem)
 
   Som vi ser kan angriperen benytte det faktum at IV er lik i begge tilfeller til å finne plaintext som er XOR-et med plaintext. Det gir ikke mye i seg selv, men kan benyttes sammen med det faktum at IP-adressen i mange nettverk er rimelig spesifisert, osv. Jo mer data man vet om pakkene, jo mer plaintext kan man finne.
 * RC4 Weak Keys. For noen nøkler vil for mange bits i de første bytes-ene i nøkkelstrømmen (pseudorandom bytes) være bestemt av noen få bit i nøkkelen selv. Altså: noen bit i nøkkelen har større effekt enn andre, mens andre har null effekt. Dette er kun i begynnelsen, fram til RC4 "kommer igang". Kan løse dette ved å forkaste de første 256 bytes.
@@ -264,5 +265,126 @@ Wireless LAN er alltid i AP. Access Control er vanligvis i AP. Authentication er
 
 IEEE802.11 dekker kun Wireless LAN. Access Control benytter 802.11X. IEEE 802.11i spesifiserer ingen obligarisk autentiseringsmetode, men RSN ble designet slik at man selv kan bestemme ønsket metode. 
 
-[main-standards-rsn.png](Main Standards in an RSN Solution Based on TLS)
+[http://github.com/kjbekkelund/ttm4137/raw/master/main-standards-rsn.png](Main Standards in an RSN Solution Based on TLS)
+
+Hvorfor er aksesskontroll viktig?
+---------------------------------
+
+Det er aksesskontrolen som styrer hvem som har tilgang hvor — autorisering.
+
+* Entitet som ønsker tilgang — Supplicant
+* Entitet som kontrollerer adgangsgate — Authenticator
+* Entitet som avgjør om supplicant får adgang — Authorizer
+
+Aksesskontroll følger alltid et lignende mønster:
+
+* Authenticator får beskjed om at Supplicant er tilstede.
+* Supplicant identifiserer seg selv.
+* Authenticator spør etter autorisering fra Authorizer.
+* Authorizer svarer ja eller nei.
+* Authenticator tillatter eller blokkerer tilgang.
+
+I boka fokuserer de på tre protokoller for implementering av adgangskontoll: 
+
+* IEEE 802.1X — Obligatorisk i WPA og RSN.
+* EAP (Extensible Authentication Protocol) — Obligatorisk i WPA og RSN.
+* RADIUS (Remote Authentication Dial-In User Service) — Obligatorisk i WPA, valgfritt i RSN.
+
+Hva er IEEE 802.1X?
+-------------------
+
+Grunnlaget for WPA og RSN.
+
+Har som hensikt å implementere aksesskontroll på det punktet der Supplicant kobler til nettverket. Dette punktet kalles en _port_ (og i forbindelse med trådløse nett er dette en logisk port, ikke en fysisk), og det er et 1-til-1 forhold mellom Supplicant og port. Hver port er assosisert med en Authenticator som kontrollerer tilstanden. Mange porter er koblet til en autentiseringsserver (Authorizer).
+
+Dersom autentiseringsserveren er innebygd i AP, trengs ikke RADIUS.
+
+I trådløse nett er det ikke nok med å bli autentisering en gang, men man må autensisere for hver pakke, ellers kan andre stjele identiteten til en bruker og bruke deres åpne port. Dermed må autoriseringen bindes til pakken, slik at dette ikke er mulig. Dette gjøres ved å inkludere meldingsautentisering (integrity).
+
+For de fleste Wi-Fi-LAN er den logiske plassen å plassere IEEE 802.1X i AP. I ad-hoc-modus er hver enhet både Supplicant og Authenticator.
+
+Hva er EAP?
+-----------
+
+Universelt autentiseringsrammeverk (altså ikke autentiseringsmetode). Hensikten er å gjøre det mulig å benytte forskjellige typer autentiseringsmetoder mellom Supplicant og Authorizer. Autentiseringen kan være ensidig eller gjensidig, avhengig av metoden. EAP benyttes i alle (upper-layer) autentiseringsmetoder, som SSL, TLS og Kerberos.
+
+Lar de to partene utveksle informasjon spesifikk for valgt autentiseringsmetode, og innholdet i disse er ikke spesifisert i EAP. EAP starter og avslutter autentisering, men tillatter hva-som-helst i midten.
+
+Fire meldingstyper:
+
+* Request. Authenticator -> Supplicant.
+* Response. Supplicant -> Authenticator.
+* Success.
+* Failure.
+
+I 802.1X videresendes disse meldingene til og fra autentiseringsserveren, slik at Authenticator blir mellommann (Analogi: dørvakt).
+
+Alle EAP-meldinger følger samme format.
+
+[http://github.com/kjbekkelund/ttm4137/raw/master/eap-message-format.png](EAP meldingsformat)
+
+* Code. 1 byte. Request = 1, Response = 2, Success = 3, Failure = 4.
+* Identifier. 2 bytes. Inkrementeres for hver melding sent. ResponseID settes til RequestID.
+* Length. 2 bytes. Totalt antall byte i EAP-melding.
+* Data.
+
+Detaljene i autentiseringsmetoden sendes i request- og response-meldinger.
+
+Request- og response-meldinger deles videre opp etter EAP Type-feltet. Første 6 typer spesifisert (resten utstedes av IANA). Identity (type 1) er viktigst. Benyttes i EAP-introduksjon. EAP-Request/Identity sendes av Autheticator til Supplicant, som svarer med EAP-Response/Identity. NAK (type 3) bruker når det requestes en autentiseringsmetode som ikke støttes. Serieautentisering er mulig. Kan gjøre så mange autentiseringer i sekvens som man ønsker.
+
+[http://github.com/kjbekkelund/ttm4137/raw/master/eap-request-response.png](EAP-Request/Response-melding)
+
+Hva er EAPOL?
+-------------
+
+For å sende EAP-meldinger rundt i nettverket må de enkapsuleres. EAP RFC spesifiserer ikke hvordan meldinger skal sendes rundt, for eksempel transport over Internett med bruk av IP. IEEE 802.1X spesifiserer protokollen EAP over LAN (EAPOL) for å sende meldinger mellom Supplicant og Authenticator. 
+
+Fem typer meldinger:
+
+* EAPOL-Start. Sendes til en spesiell reservert gruppe-multikast MAC-adresse, for å finne ut om en Authenticator er tilstede. Som svar sendes en EAPOL-Packet som inneholder en EAP-Request/Identity-melding.
+* EAPOL-Key. Brukes for å sende krypteringsnøkler fra Authenticator til Supplicant.
+* EAPOL-Packet. Brukes for å sende EAP-meldinger. Enkel beholder.
+* EAPOL-Logoff. Indikerer at Supplicant ønsker å koble fra nettverket.
+* EAPOL-Encapsulated-ASF-Alert. _Benyttes ikke i WPA eller RSN_.
+
+[http://github.com/kjbekkelund/ttm4137/raw/master/EAP-message-flow.png](EAP meldingsflyt)
+
+Hva er RADIUS?
+--------------
+
+Nettverksprotokoll som gir sentralisering autentisering, autorisering og regnskapsføring. Definerer to ting: funksjonaliteten inkludert i autentiseringsserver, og protokollen for å snakke med serveren. Laget for TCP/IP.
+
+Fire meldingstyper:
+
+* Access-Request. AP -> AS.
+* Access-Challange. AP <- AS.
+* Access-Accept. AP <- AS.
+* Access-Reject. AP <- AS.
+
+Alle RADIUS-meldinger har samme basisformat.
+
+[http://github.com/kjbekkelund/ttm4137/raw/master/radius-message-format.png](RADIUS-meldingsformat)
+
+* Code. Access-Request = 1, Access-Accept = 2, Access-Reject = 3, Access-Challange = 11.
+* Identifier. Vilkårlig tall brukt for å matche forespørsel og svar.
+* Length. Totalt antall byte i meldingen.
+* Authenticator. 16 bytes, avhenger av meldingstype. I Access-Request er det en nonce, og er salt i passordet som sendes passord. I Reply-meldinger brukes det til integritetssjekk.
+* I hoveddelen av RADIUS-meldingen sendes en serie attributter, som er (self-contained) pakker med informasjon. Nytteinformasjon. WPA har spesifiserer attributtene de bruker. Hvert attributt har samme format.
+  * Type. 1 byte. Identifisere typen.
+  * Length. 1 byte. Totalt antall byte.
+  * Data.
+
+Trengs kun dersom autentiseringsserveren ikke holder til på samme plass som Authenticator. I WPA er RADIUS obligatorisk. 
+
+Hvordan fungerer EAP over RADIUS?
+---------------------------------
+
+Utvidet til å støtte EAP-meldinger videresendt av AP. AP blir det mellomperson i autentiseringsprosessen. Autentiseringsbeslutning blir sendt til både AP og Supplicant.
+
+EAP-meldinger sendes til autentiseringsserveren i Access-Request-meldinger, og returneres i Access-Challange-meldinger. Selge EAP-meldinger sendes i (en eller flere) attributter med type = 79. 
+
+[http://github.com/kjbekkelund/ttm4137/raw/master/eap-radius.png](EAP over RADIUS)
+
+Hvordan henger IEEE 802.1X, EAP og RADIUS sammen?
+-------------------------------------------------
 
