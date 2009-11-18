@@ -4,12 +4,12 @@ TTM4137
 Hva er de seks prinsippene for sikkerhetstenkning?
 --------------------------------------------------
 
-1. Don't talk to anyone you don't know. For a Wi-Fi LAN, it is not enough to verify the identity of the other party. A Wi-Fi LAN must also verify that every message really came from that party. 
-2. Accept nothing without a guarantee. Means a guarantee of authenticity. Ingen endring. 
-3. Treat everyone as an enemy until proved otherwise.
-4. Don't trust your friends for long. "Friends" in a Wi-Fi LAN can be identified because they possess tokens such as a secret key that can be verified. Such tokens, whether they are keys, certificates, or passwords, need to have a limited life. Renew tokens periodically.
-5. Use well-tried solutions.
-6. Watch the ground you are standing on for cracks. The challenge for hackers, of course, is to look for the little cracks and crevices that result from hidden assumptions.
+1. Ikke snakk til noen du ikke kjenner. For a Wi-Fi LAN, it is not enough to verify the identity of the other party. A Wi-Fi LAN must also verify that every message really came from that party.
+2. Godta ingenting uten garanti. Means a guarantee of authenticity. Ingen endring. 
+3. Behandle alle som en fiende til det motsatte er bevist.
+4. Ikke stol på vennene dine for lenge. "Friends" in a Wi-Fi LAN can be identified because they possess tokens such as a secret key that can be verified. Such tokens, whether they are keys, certificates, or passwords, need to have a limited life. Renew tokens periodically.
+5. Bruk gjennomprøvde løsninger.
+6. Se etter sprekker i bakken du står på. The challenge for hackers, of course, is to look for the little cracks and crevices that result from hidden assumptions.
 
 Begreper
 --------
@@ -85,8 +85,8 @@ I ad-hoc-modus (IBSS) er det derimot ikke noe aksesspunkt, og hver trådløs-enh
 Forklar basisoperasjon i infrastruktur-modus
 --------------------------------------------
 
-AP = Fixed Access Point
-STA = (Station) Wireless Device
+* AP = Fixed Access Point
+* STA = (Station) Wireless Device
 
 AP og STA snakker med hverandre ved å bruke trådløse meldinger. AP er koblet til (wired) nettverket STA ønsker å aksessere.
 
@@ -242,6 +242,8 @@ Deler arkitektur og tilnærming. WPA har et subset av funksjonaliteten, fokusert
 
 Både RSN og WPA fungerer i infrastruktur modus, mens kun RSN fungerer i ad-hoc modus (dvs ingen aksesspunkter). Ad-hoc modus kalles noen ganger IBSS (Independent Basic Service Set) modus. 
 
+(RSN == WPA2? Wi-Fi sertifikasjonen heter WPA2, mens det som står i IEEE 802.11i er RSN?)
+
 Hva er en sikkerhetskontekst (security context)?
 ------------------------------------------------
 
@@ -385,6 +387,154 @@ EAP-meldinger sendes til autentiseringsserveren i Access-Request-meldinger, og r
 
 ![EAP over RADIUS](http://github.com/kjbekkelund/ttm4137/raw/master/eap-radius.png)
 
-Hvordan henger IEEE 802.1X, EAP og RADIUS sammen?
--------------------------------------------------
+Hvordan henger RSN, WPA, IEEE 802.1X, EAP og RADIUS sammen?
+-----------------------------------------------------------
 
+Hvilke metoder kan brukes for autentisering i RSN?
+--------------------------------------------------
+
+RSN er fleksibelt, slik at mange forskjellige typer autentisering er mulig. TLS, Kerberos, PEAP og autentiseringen i GSM-SIM er noen eksempler.
+
+Wi-Fi Alliance er fri til å velge hvilke typer autentisering de støtter, mens IEEE 802 har vanskeligere for å gjøre det, siden det er en LAN protokoll-standard. Autentiseringen gjøres i øverste lag.
+
+Det er vanlig å benytte en PKI til å etablere en sikkerhetskontekst, og deretter utveksle nøkler som skal brukes til kryptering. Grunnen til dette er at asymmetrisk kryptering er mer prosessor-krevende enn symmetrisk kryptering.
+
+Beskriv TLS
+-----------
+
+TLS er en standardisert versjon av SSL. 
+
+WPA/RSN benytter kun en del av TLS, siden de benytter henholdvis TKIP og CCMP til kryptering. Benytter altså autentisering fra TLS. 
+
+TLS er delt i to lag. _Record protocol_ er ansvarlig for å flytte data mellom de to enhetene ved å benytte de parametrene man ble enige om via _handshake protocol_. Record opererer etter en tilkoblingstilstand. Har fire slike: Current transmit, pending transmit, current receive og pending receive. Kan sees på som konfigurasjonen til laget. Pending er de tilstandene som gjøres klar til bruk. Bytter ved å sende "Change Connection State".
+
+Benytter symmetrisk kryptering etter oppsetting ved bruk av assymetrisk. Handshake protokollen benytter sertifikater til å gjøre offentlig nøkkel-kryptering.
+
+Prosessen med handshake:
+
+* Client Hello. Inneholder en liste over støttede _ciphersuites_ og _compression methods_. Ciphersuite = Type sertifikat, krypteringsmetode og integritetssjekk-metode. Inneholder også en nonce.
+* Server Hello. Inneholder nonce, forskjellig fra mottatt nonce, og sesjonsID. På dette tidspunktet har klient og server synkronisert tilstander, blitt enige om sesjonsID og _ciphersuite_, og utvekslet to nonce-er. 
+* Server Certificate. Server sender sertifikat til klient, som validerer det ved å benytte CAs offentlige nøkkel.
+* Client Certificate. Kun dersom server krever sertifikat av klient. 
+* Client Key Exchange. Målet er å lage en gjensidig hemmelig nøkkel (Master secret). Klient genererer 48 bytes random tall, som krypteres og sendes til server, som dekrypterer det. Dette blir da pre-master secret.
+* Client Certificate Verification. Klienten verifiserer seg ved å hashe alle meldinger fram til nå (sendt og mottatt), signer det med den sertifikatet, og sender til serveren, som sjekker det. Regner så ut master secret. Benytter pre-master secret og de to nonce-ene til å lage en 48 bytes master secret. 
+* Change Connection State. Har nå lagd en pending tilstand som det kan byttes til. Hver side sender en til hverandre.
+* Finished. Bekreftelse av at systemet er oppe og går. Begge sender til hverandre. Siden dette er etter tilstandsbytte vil begge meldinger være krypterte.
+
+Hvordan brukes TLS i EAP?
+-------------------------
+
+TLS handshake oppnår tre ting: Autentisert serveren (og optionally klienten), generert master key, intialisert ciphersuite. WPA og RSN benytter kun disse delene av TLS, siden de allerede har TKIP eller CCMP for kryptering og integritetssjekking. 
+
+Format på EAP-TLS-melding er litt forskjellig fra standard EAP-melding.
+
+![EAP-TLS-meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/eap-tls-message.png)
+
+Først _length_ spesifiserer antall byte i meldingen. Den andre er lengden på TLS-meldingen, siden den kan strekke over flere EAP-meldinger. Flags: Length included, More fragments, Start (av handshake).
+
+![EAP-TLS handshake](http://github.com/kjbekkelund/ttm4137/raw/master/eap-tls-handshake.png)
+
+TLS settes opp mellom autentiseringsserver og Supplicant, og RADIUS brukes for å sende EAP-meldinger til autentiseringsserveren og får slik en kopi av master key.
+
+Hvordan fungerer PEAP?
+----------------------
+
+Den orginale motivasjonen var å gjøre passord-basert trygg fra "offline dictionary"-angrep. For å oppnå dette er EAP-sesjonen fullstendig gjemt for angriper. Målet med EAP er autentisitet, men det er fullt mulig å gjøre en kobling privat uten autentisering først. Altså kan man sette opp en privat kanal (f.eks. med pseudonym fra klienten, mens serveren autentiseres), og så gjennomføre gjensidig autentisering. Har ingenting å si om "feil" person får opprettet en privat kanal.
+
+Beskriv EAP-SIM
+---------------
+
+Benytter den hemmelige informasjon i SIM-kortet. Basic approach: Challange-response der nettverket sender en random verdi som må krypteres og sendes tilbake. Prosessen består av tre tall (kalt triplet): (Random challange (RAND), 64 bit session key (Kc), Respons kalt SRES som beregnes ut fra Kc og RAND). Algoritmen for SRES og Kc er ikke tilgjenglig utenfor SIM-kortet. (Setter en viss begrensning på hvem som kan implementere EAP-SIM.)
+
+Målet er å benytte eksisterende GSM-autentisering så uendret som mulig. Et problem er at SIM-kortet ikke produserer en lang master key, kun 64 bits. Benytter derfor algoritmen flere ganger slik at flere master keys genereres, og kan konkateneres. Introduserer _IMSI privacy_. I en autentisering blir server og mobil enig om ny identitet som skal brukes i neste autentisering (pseudonym). 
+
+Et sentralt problem er at det ikke er skikkelig gjensidig autentisering. Nettverket blir ikke eksplisitt autentisert, kun gjennom at det har lik SRES og Kc som mobilen beregner.
+
+![Meldingsflyt i EAP-SIM](http://github.com/kjbekkelund/ttm4137/raw/master/message-flow-eap-sim.png)
+
+Hva innebærer det at en autentiseringsmetode er key-generating?
+---------------------------------------------------------------
+
+Hvordan verifiserer Supplicant at AP legitim?
+---------------------------------------------
+
+At AP faktisk har nøkkelen Supplicant og Autentiseringsserveren har blitt enig om. Denne blir sendt på sikker måte med RADIUS fra autentiseringsserveren til AP.
+
+Hvordan lages/velges en nonce?
+------------------------------
+
+Forensic analysis of mobile phones
+----------------------------------
+
+Faser:
+
+* Sikre bevis. Prinsipper: Integritet og kompletthet. Praktiske omstendigheter (incluence) valg av metode — enten harddisk-imageing eller filkopiering. 
+* Recovery.
+* Analyse. I prinsippet to metoder: Manuell analyse & søk. Hovedproblem: Enorme mengder data. Keywords, bytes (f.eks. starten på JPEG-fil), time stamps, links (metadata).
+* Presentasjon.
+
+Hva er Milenage?
+----------------
+
+Hash-funksjonen som brukes i UMTS.
+
+Hva er Kasumi?
+--------------
+
+Hva er crypto-period?
+---------------------
+
+The communication period a cryptokey is used/valid.
+
+Hvorfor ble TKIP byttet ut med CCMP?
+------------------------------------
+
+Den eneste grunnen til at TKIP ble benyttet i WPA var at protokollen måtte bygge på samme hardware som WEP. AES-basert sikkerhet kan generelt sees som sikrere enn TKIP-basert sikkerhet, men det betyr _ikke_ at TKIP er usikker. CCMP var spesialbygd for RSN fra grunnen av.
+
+AES er ikke en sikkerhetsprotokoll, men et blokkcipher. I RSN er sikkerhetsprotokollen CCMP, som definerer et seg med regler for kryptering og sikring av IEEE 802.11 frames.
+
+Beskriv AES
+-----------
+
+Block cipher. 128 bit nøkkel- og blokklengde.
+
+Beskriv operasjonsmodusen CCM
+-----------------------------
+
+En operasjonsmodus trengs når meldinger ikke er av spesifikk lengde. Må da definere en måte å konvertere dataen til en sekvens med blokker med gitt lengde før kryptering. CCMP benytter CCM (Counter Mode + CBC-MAC), som er basert på counter mode. 
+
+![Counter Mode](http://github.com/kjbekkelund/ttm4137/raw/master/countermode.png)
+
+Siden counter mode endrer verdi for hver blokk, vil cipher text endres selv om dataen krypteres med samme nøkkel. Initialisert fra en nonce, ikke fra 1, siden man da ville kunnet funnet tilbake til dataen. Kryptering og dekryptering er likt i counter mode. Grunnen til at man ikke brukte counter mode, er fordi den kun gir kryptering, ikke MIC. 
+
+I CCM benyttes CBC til å produsere en MIC, som kalles Message Authentication Code (MAC). Derav CBC-MAC.
+
+![CBC-MAC](http://github.com/kjbekkelund/ttm4137/raw/master/cbc-mac.png)
+
+Nyttige features i CCM:
+
+* Spesifisering av nonce
+* Kobling mellom kryptering og autentisering med én nøkkel
+* Utvidet autentisering til data som ikke er kryptert (f.eks. headeren)
+
+Hva er en MIC?
+--------------
+
+En Message Integrity Code (MIC) trengs for å garantere en meldings autensitet. 
+
+Hvordan er MIC-en i CCMP regnet ut?
+-----------------------------------
+
+64 bit. Gjort ved bruk av CBC-MAC, der nedre 64 bit discardes. 
+
+Hvorfor kan ikke packet number (PN) brukes som nonce i CCMP?
+------------------------------------------------------------
+
+Nederst på s 274
+
+Hvordan brukes CCMP i RSN?
+--------------------------
+
+CCMP krypterer data på MPDU-nivå.
+
+![Kryptering av MPDU](http://github.com/kjbekkelund/ttm4137/raw/master/ccmp-mpdu.png)
