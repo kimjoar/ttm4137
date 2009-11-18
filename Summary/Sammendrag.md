@@ -23,7 +23,7 @@ Begreper
 
 The traditional approach for network security is to divide the network into two zones: trusted and untrusted. There is no need for network security protection within the trusted zone because there are no enemies present. By contrast, you regard the untrusted zone as full of enemies.
 
-![Conventional Security Architecture](http://github.com/kjbekkelund/ttm4137/raw/master/conventional-security-architecture.png)
+![Conventional Security Architecture](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/conventional-security-architecture.png)
 
 How does Wi-Fi LAN fit into this conventional security architecture?
 
@@ -110,7 +110,7 @@ Forklar MAC (header) i IEEE 802.11
 
 MAC-headeren er en del av det generelle formatet på rammer i IEEE 802.11.
 
-![Generelt format på rammer i IEEE 802.11](http://github.com/kjbekkelund/ttm4137/raw/master/basic-frame-format-802-11.png)
+![Generelt format på rammer i IEEE 802.11](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/basic-frame-format-802-11.png)
 
 Tre typer basert på om det er snakk om en kontrollramme, styringsramme eller dataramme. Viktigste del: adresser. 6 byte per adresse. Hver enhet har en unik adresse spesifisert under produksjon. Destinasjon kan være unikast eller multikast.
 
@@ -162,7 +162,7 @@ Først ankommer en pakke IEEE 802.11 MAC tjenestelaget. Denne kalles MSDU (MAC s
 * _Integrity check value_ (ICV) gjør at pakken ikke skal kunne endres under transport.
 * Nøkkelnummer og IV sendes ukryptert, slik at mottakeren vet hvordan meldingen skal dekrypteres.
 
-![WEP message, nesten klar](http://github.com/kjbekkelund/ttm4137/raw/master/wep-message.png)
+![WEP message, nesten klar](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/wep-message.png)
 
 I tillegg til dette
 
@@ -214,7 +214,7 @@ Tre svakheter i måten WEP benytter RC4:
 
 * IV Reuse. Ved å ha lik IV i flere pakker har samme problem som dersom man har null salt i det hele tatt. RC4 vil dermed starte i samme tilstand.
   
-  ![IV Reuse Problem](http://github.com/kjbekkelund/ttm4137/raw/master/iv-reuse-problem.png)
+  ![IV Reuse Problem](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/iv-reuse-problem.png)
 
   Som vi ser kan angriperen benytte det faktum at IV er lik i begge tilfeller til å finne plaintext som er XOR-et med plaintext. Det gir ikke mye i seg selv, men kan benyttes sammen med det faktum at IP-adressen i mange nettverk er rimelig spesifisert, osv. Jo mer data man vet om pakkene, jo mer plaintext kan man finne.
 * RC4 Weak Keys. For noen nøkler vil for mange bits i de første bytes-ene i nøkkelstrømmen (pseudorandom bytes) være bestemt av noen få bit i nøkkelen selv. Altså: noen bit i nøkkelen har større effekt enn andre, mens andre har null effekt. Dette er kun i begynnelsen, fram til RC4 "kommer igang". Kan løse dette ved å forkaste de første 256 bytes.
@@ -267,7 +267,7 @@ Wireless LAN er alltid i AP. Access Control er vanligvis i AP. Authentication er
 
 IEEE802.11 dekker kun Wireless LAN. Access Control benytter 802.11X. IEEE 802.11i spesifiserer ingen obligarisk autentiseringsmetode, men RSN ble designet slik at man selv kan bestemme ønsket metode. 
 
-![Main Standards in an RSN Solution Based on TLS](http://github.com/kjbekkelund/ttm4137/raw/master/main-standards-rsn.png)
+![Main Standards in an RSN Solution Based on TLS](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/main-standards-rsn.png)
 
 Hvorfor er aksesskontroll viktig?
 ---------------------------------
@@ -323,7 +323,7 @@ I 802.1X videresendes disse meldingene til og fra autentiseringsserveren, slik a
 
 Alle EAP-meldinger følger samme format.
 
-![EAP meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/eap-message-format.png)
+![EAP meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/eap-message-format.png)
 
 * Code. 1 byte. Request = 1, Response = 2, Success = 3, Failure = 4.
 * Identifier. 2 bytes. Inkrementeres for hver melding sent. ResponseID settes til RequestID.
@@ -334,7 +334,7 @@ Detaljene i autentiseringsmetoden sendes i request- og response-meldinger.
 
 Request- og response-meldinger deles videre opp etter EAP Type-feltet. Første 6 typer spesifisert (resten utstedes av IANA). Identity (type 1) er viktigst. Benyttes i EAP-introduksjon. EAP-Request/Identity sendes av Autheticator til Supplicant, som svarer med EAP-Response/Identity. NAK (type 3) bruker når det requestes en autentiseringsmetode som ikke støttes. Serieautentisering er mulig. Kan gjøre så mange autentiseringer i sekvens som man ønsker.
 
-![EAP-Request/Response-melding](http://github.com/kjbekkelund/ttm4137/raw/master/eap-request-response.png)
+![EAP-Request/Response-melding](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/eap-request-response.png)
 
 Hva er EAPOL?
 -------------
@@ -349,7 +349,7 @@ Fem typer meldinger:
 * EAPOL-Logoff. Indikerer at Supplicant ønsker å koble fra nettverket.
 * EAPOL-Encapsulated-ASF-Alert. _Benyttes ikke i WPA eller RSN_.
 
-![EAP meldingsflyt](http://github.com/kjbekkelund/ttm4137/raw/master/EAP-message-flow.png)
+![EAP meldingsflyt](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/EAP-message-flow.png)
 
 Hva er RADIUS?
 --------------
@@ -365,7 +365,7 @@ Fire meldingstyper:
 
 Alle RADIUS-meldinger har samme basisformat.
 
-![RADIUS-meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/radius-message-format.png)
+![RADIUS-meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/radius-message-format.png)
 
 * Code. Access-Request = 1, Access-Accept = 2, Access-Reject = 3, Access-Challange = 11.
 * Identifier. Vilkårlig tall brukt for å matche forespørsel og svar.
@@ -385,7 +385,7 @@ Utvidet til å støtte EAP-meldinger videresendt av AP. AP blir det mellomperson
 
 EAP-meldinger sendes til autentiseringsserveren i Access-Request-meldinger, og returneres i Access-Challange-meldinger. Selge EAP-meldinger sendes i (en eller flere) attributter med type = 79. 
 
-![EAP over RADIUS](http://github.com/kjbekkelund/ttm4137/raw/master/eap-radius.png)
+![EAP over RADIUS](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/eap-radius.png)
 
 Hvordan henger RSN, WPA, IEEE 802.1X, EAP og RADIUS sammen?
 -----------------------------------------------------------
@@ -428,11 +428,11 @@ TLS handshake oppnår tre ting: Autentisert serveren (og optionally klienten), g
 
 Format på EAP-TLS-melding er litt forskjellig fra standard EAP-melding.
 
-![EAP-TLS-meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/eap-tls-message.png)
+![EAP-TLS-meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/eap-tls-message.png)
 
 Først _length_ spesifiserer antall byte i meldingen. Den andre er lengden på TLS-meldingen, siden den kan strekke over flere EAP-meldinger. Flags: Length included, More fragments, Start (av handshake).
 
-![EAP-TLS handshake](http://github.com/kjbekkelund/ttm4137/raw/master/eap-tls-handshake.png)
+![EAP-TLS handshake](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/eap-tls-handshake.png)
 
 TLS settes opp mellom autentiseringsserver og Supplicant, og RADIUS brukes for å sende EAP-meldinger til autentiseringsserveren og får slik en kopi av master key.
 
@@ -450,7 +450,7 @@ Målet er å benytte eksisterende GSM-autentisering så uendret som mulig. Et pr
 
 Et sentralt problem er at det ikke er skikkelig gjensidig autentisering. Nettverket blir ikke eksplisitt autentisert, kun gjennom at det har lik SRES og Kc som mobilen beregner.
 
-![Meldingsflyt i EAP-SIM](http://github.com/kjbekkelund/ttm4137/raw/master/message-flow-eap-sim.png)
+![Meldingsflyt i EAP-SIM](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/message-flow-eap-sim.png)
 
 Hva innebærer det at en autentiseringsmetode er key-generating?
 ---------------------------------------------------------------
@@ -503,13 +503,13 @@ Beskriv operasjonsmodusen CCM
 
 En operasjonsmodus trengs når meldinger ikke er av spesifikk lengde. Må da definere en måte å konvertere dataen til en sekvens med blokker med gitt lengde før kryptering. CCMP benytter CCM (Counter Mode + CBC-MAC), som er basert på counter mode. 
 
-![Counter Mode](http://github.com/kjbekkelund/ttm4137/raw/master/countermode.png)
+![Counter Mode](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/countermode.png)
 
 Siden counter mode endrer verdi for hver blokk, vil cipher text endres selv om dataen krypteres med samme nøkkel. Initialisert fra en nonce, ikke fra 1, siden man da ville kunnet funnet tilbake til dataen. Kryptering og dekryptering er likt i counter mode. Grunnen til at man ikke brukte counter mode, er fordi den kun gir kryptering, ikke MIC. 
 
 I CCM benyttes CBC til å produsere en MIC, som kalles Message Authentication Code (MAC). Derav CBC-MAC.
 
-![CBC-MAC](http://github.com/kjbekkelund/ttm4137/raw/master/cbc-mac.png)
+![CBC-MAC](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/cbc-mac.png)
 
 Nyttige features i CCM:
 
@@ -537,4 +537,4 @@ Hvordan brukes CCMP i RSN?
 
 CCMP krypterer data på MPDU-nivå.
 
-![Kryptering av MPDU](http://github.com/kjbekkelund/ttm4137/raw/master/ccmp-mpdu.png)
+![Kryptering av MPDU](http://github.com/kjbekkelund/ttm4137/raw/master/Summary/ccmp-mpdu.png)
