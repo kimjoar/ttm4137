@@ -486,6 +486,11 @@ Hva er crypto-period?
 
 The communication period a cryptokey is used/valid.
 
+Hva er TKIP?
+------------
+
+
+
 Hvorfor ble TKIP byttet ut med CCMP?
 ------------------------------------
 
@@ -525,7 +530,15 @@ En Message Integrity Code (MIC) trengs for å garantere en meldings autensitet.
 Hvordan er MIC-en i CCMP regnet ut?
 -----------------------------------
 
-64 bit. Gjort ved bruk av CBC-MAC, der nedre 64 bit discardes. 
+Utregning av MIC starter med CBC-MAC, og XOR-er etterpå alle de neste blokkene, og krypterer resultatet. Ender på 128 bit, der de nedre 64 bit discardes.
+
+Første blokk bruker ikke data fra MPDU, men med en blokk bestående av nonce, flag og DLen. 
+
+* Nonce blir laget ved å kombinere PN og MAC-adressen til senderen, samt en prioritetsverdi, til evt framtidig bruk. 
+* Flag har alltid samme verdi i RSN: 01011001
+* DLen indikerer lengden på plaintext
+
+![CBC-MAC første blokk](http://github.com/kjbekkelund/ttm4137/raw/master/media/cbc-mac-first-block.png)
 
 Hvorfor kan ikke packet number (PN) brukes som nonce i CCMP?
 ------------------------------------------------------------
@@ -535,6 +548,39 @@ Nederst på s 274
 Hvordan brukes CCMP i RSN?
 --------------------------
 
+Rammeflyt gjennom CCMP:
+
 ![Rammeflyt gjennom CCMP](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-mpdu.png)
 
+Steg i MPDU-prosessering:
+
 ![Steg i MPDU-prosessering](http://github.com/kjbekkelund/ttm4137/raw/master/media/steps-mpdu.png)
+
+CCMP headeren sendes ukryptert. Totalt 8 bytes fordelt på:
+
+* 48 bits = 6 byte pakkenummer (PN) som gir replay-beskyttelse, og som gjør det mulig for mottaker å dedusere seg fram til nonce brukt i krypteringen. 
+* 1 byte nøkkel-id. Informasjon om hvilken gruppenøkkel som skal brukes ved multikast.
+* 1 byte reservert.
+
+![CCMP header](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-header.png)
+
+Kryptering og dekryptering:
+
+![Kryptering og dekryptering](http://github.com/kjbekkelund/ttm4137/raw/master/media/encrypt-decrypt-ccmp.png)
+
+CCMP-kryptering:
+
+![CCMP-kryptering](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-encryption.png)
+
+Steg i CCMP-kryptering:
+
+![Steg i CCMP-kryptering](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-encryption-stages.png)
+
+Et essensielt steg i krypteringen er å initialisere counteren, slik at den ikke får en verdi som har blitt brukt før. Lages på nesten samme måte som nonce til MIC-en, men bruker en Ctr (Counter) istedenfor DLen. Ctr begynner å telle på 1, og er 16 bit. Dermed unik for enhver melding med færre enn 65536 blokker.
+
+Dekryptering:
+
+* Velger nøkkel for dekryptering basert på MAC-adresse
+* Sjekker om PN > tidligere mottatt PN
+* Dekrypterer ved bruk av AES i counter-mode.
+* Sjekker MIC mot mottatte felt
