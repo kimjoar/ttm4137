@@ -1,15 +1,27 @@
 TTM4137
 =======
 
+Læringsmålene er kunnskap og forståelse om
+
+* Security threats in wireless communication systems, thereby establishing a basis for vulnerability analysis skill.
+* Some of the models, design principles, mechanisms and solutions used in wireless network security.
+* Topical wireless technologies (WLAN, UMTS, Adhoc).
+
+Disse notatene er primært basert på Edney & Arbaugh: _Real 802.11 Security_ og Niemi & Nyberg: _UMTS Security_.
+
 Hva var problemet i WEP?
 ------------------------
 
 Står for Wired Equivalent Privacy. 
 
-Mål i 1999-standarden inkluderer rimelig sterk, selvsynkronisering, effektiv og eksporterbar. Standarden spesifiserte 40-bits nøkler, men en ikke-standard utvidelse bruker 104 bit. Definerte også to typer sikkerhet: åpent (dvs ingen sikkerhet) og delt nøkkel.
+Mål i 1999-standarden inkluderer rimelig sterk, selvsynkronisering for hver PDU (Protocol Data Unit), effektiv i hardware og software, og eksporterbar. Standarden spesifiserte 40-bits nøkler, men en ikke-standard utvidelse bruker 104 bit. Definerte også to typer sikkerhet: åpent (dvs ingen sikkerhet) og delt nøkkel.
+
+Og med delt nøkkel starter problemet. Greit for et lite hjemmenettverk, men hva skjer om man skal implementere det i en stor organisasjon? Problemer er blant annet at det er ingen måte å skille brukere og det er manuell distribusjon av nøkkel.
 
 * Autentiseringsfase. Bevise sin identitet til hverandre. Problem: ingen hemmelig token, altså ingen måte å vite at etterfølgende meldinger kommer fra samme enhet. Meningsløst. Med delt nøkkel er målet at mobil enhet skal vise at den har nøkkelen. AP sender plaintext, får tilbake ciphertext. Snilt for hackere.
 * Krypteringsfase. Benytter RC4. Enkel å implementere. Rask. Initialisering og kryptering skjer på hver pakke. 24 bit til initialiseringsvektor (IV). IV endres for hver pakke, og sendes sammen med pakken. Gjør at samme plaintext gir forskjellige ciphertext. Nøkkel til RC4 er sammensatt av hemmelig nøkkel og IV. Problemet er at IV aldri bør brukes mer enn én gang per nøkkel. I WEP er det 24 bit, dvs ca 17 mill IV-verdier. Mange systemer starter med samme IV etter oppstart, og benytter et pseudorandom bytte.
+
+![WEP Block Diagram](http://github.com/kjbekkelund/ttm4137/raw/master/media/wep-block-diagram.png)
 
 ### Svakheter
 
@@ -17,7 +29,7 @@ Mål i 1999-standarden inkluderer rimelig sterk, selvsynkronisering, effektiv og
 * Svake nøkler på grunn av oppbygningen (FMS-angrepet)
 * Ingen deteksjon av tampering
 * Bruker master key direkte
-* Ingen beskyttelse mot replay
+* Ingen beskyttelse mot replay, sjekker aldri noen sekvens
 
 Hva er forskjellen på default keys og key mapping keys?
 -------------------------------------------------------
@@ -112,24 +124,39 @@ Hva er RSN?
 
 IEEE 802.11i definerer en ny type trådløst nettverk, kalt Robust Security Network (RSN). IEEE 802.11i definerer også en Transitional Security Network (TSN) der RSN- og WEP-systemer kan operere i parallell.
 
+Security Goals: 
+
+* Confidentiality
+* Message Integrity and Authenticity
+* Replay detection
+
+Består av:
+
+* AES-CCMP. 128-bit block cipher with 128-bit secret key. Counter Mode initial nonce value (Source address (48), Packet number (48), Ctr(16), other(16)). CBC-MAC initial nonce value (Similar to counter mode), output is the 64 lower bits.
+* RSN nøkkelhierarki
+* 802.1x Access Control System
+
 Hva er TSN?
 -----------
 
-Transient Security Network
+Transitional Security Network = WPA på samme måte som RSN = WPA2
 
 Hva er WPA?
 -----------
 
 Siden det ville ta lang tid å innføre en ny standard etter man innså at WEP ikke var sikker, lagde IEEE 802.11i en erstatning som fungerte med funksjonaliteten i eksiterende Wi-Fi-produkter — Wi-Fi Protected Access (WPA). Spesifiserte her Temporal Key Integrity Protocol (TKIP), som er tillatt som en valgfri modus i RSN.
 
-Hva er forskjellen på WPA og RSN?
+Sammenligning av WEP, TKIP og RSN
 ---------------------------------
 
-Deler arkitektur og tilnærming. WPA har et subset av funksjonaliteten, fokusert på en måte å implementere et nettverk. RSN har støtte for AES i tillegg til TKIP. 
+![Sammenligning av WEP, TKIP og RSN](http://github.com/kjbekkelund/ttm4137/raw/master/media/comparison-wep-tkip-rsn.png)
 
-Både RSN og WPA fungerer i infrastruktur modus, mens kun RSN fungerer i ad-hoc modus (dvs ingen aksesspunkter). Ad-hoc modus kalles noen ganger IBSS (Independent Basic Service Set) modus. 
+Hva er forskjellen på TSN og RSN?
+---------------------------------
 
-(RSN == WPA2? Wi-Fi sertifikasjonen heter WPA2, mens det som står i IEEE 802.11i er RSN?)
+Deler arkitektur og tilnærming. TSN har et subset av funksjonaliteten, fokusert på en måte å implementere et nettverk. RSN har støtte for AES i tillegg til TKIP. 
+
+Både RSN og TSN fungerer i infrastruktur modus, mens kun RSN fungerer i ad-hoc modus (dvs ingen aksesspunkter). Ad-hoc modus kalles noen ganger IBSS (Independent Basic Service Set) modus. 
 
 Hva er en sikkerhetskontekst (security context)?
 ------------------------------------------------
@@ -192,6 +219,8 @@ I trådløse nett er det ikke nok med å bli autentisering en gang, men man må 
 
 For de fleste Wi-Fi-LAN er den logiske plassen å plassere IEEE 802.1X i AP. I ad-hoc-modus er hver enhet både Supplicant og Authenticator.
 
+![802.1x lag](http://github.com/kjbekkelund/ttm4137/raw/master/media/802-1x-lag.png)
+
 Hva er EAP?
 -----------
 
@@ -241,7 +270,7 @@ Fem typer meldinger:
 Hva er RADIUS?
 --------------
 
-Nettverksprotokoll som gir sentralisering autentisering, autorisering og regnskapsføring. Definerer to ting: funksjonaliteten inkludert i autentiseringsserver, og protokollen for å snakke med serveren. Laget for TCP/IP.
+Nettverksprotokoll som gir sentraliserert autentisering, autorisering og regnskapsføring. Definerer to ting: funksjonaliteten inkludert i autentiseringsserver, og protokollen for å snakke med serveren. Laget for TCP/IP.
 
 Fire meldingstyper:
 
@@ -387,6 +416,8 @@ Et Wi-Fi LAN-kort består av fire deler:
 
 Det er MAC-en som implementerer IEEE 802.11-protokollen. MAC ligger på en IC, rundt en mikroprosessor. 
 
+![TKIP](http://github.com/kjbekkelund/ttm4137/raw/master/media/tkip.png)
+
 ### Integrity
 
 Trengte en måte å lage en MIC som ikke trengte multiplikasjon eller nye krypto-algoritmer. Løsningen heter Michael, som kun består av shift- og add-operasjoner. Problemet er at Michael er sårbar mot brute force-angrep, men gjør opp for dette med _countermeasures_. Dette går ut på å ha en pålitelig måte å detektere angrep. Michael opererer på MSDU-er. Dette reduserer overhead siden man ikke trenger en MIC per fragment (MPDU). TKIP-kryptering gjøres derimot på MPDU-nivå. 
@@ -439,6 +470,8 @@ På hvilken måte er TKIP forskjellig fra WEP?
 * Endrer krypteringsnøkkel for hver frame.
 * Større IV.
 * Nøkkelstyring.
+
+![TKIP og WEP](http://github.com/kjbekkelund/ttm4137/raw/master/media/tkip-and-wep.png)
 
 Beskriv AES
 -----------
@@ -527,6 +560,8 @@ Dekryptering:
 * Dekrypterer ved bruk av AES i counter-mode.
 * Sjekker MIC mot mottatte felt
 
+![CCMP Crypto](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-crypto.png)
+
 Beskriv Man-in-the-Middle-angrepet på UMTS
 ------------------------------------------
 
@@ -575,8 +610,8 @@ Begreper
 * Security protocol. Real security is provided by a set of processes and procedures that are carefully linked together.
 * Key Entropy. The number of possible key values determines the strength of the key.
 
-(spørsmål ang tradisjonell sikkerhetsarkitektur)
-------------------------------------------------
+Tradisjonell sikkerhetsarkitektur
+---------------------------------
 
 The traditional approach for network security is to divide the network into two zones: trusted and untrusted. There is no need for network security protection within the trusted zone because there are no enemies present. By contrast, you regard the untrusted zone as full of enemies.
 
@@ -584,13 +619,15 @@ The traditional approach for network security is to divide the network into two 
 
 How does Wi-Fi LAN fit into this conventional security architecture?
 
-1. Option 1: Put Wireless LAN in the Untrusted Zone. With the possible exception of national security headquarters, offices do not have perfect screening. You may decide, therefore, that Wi-Fi LANs are always operating in an untrusted zone. You can get around this by using VPN, but that might slow down communication, demand a high capacity VPN server, and limit the types of operation that can be performed.
-2. Option 2: Make Wi-Fi LAN Trusted. Make the Wi-Fi LAN itself fundamentally impenetrable by enemies. You can make Wi-Fi LANs as trusted as wired LANs by making it very difficult to decode the wireless signals.
+1. Put Wireless LAN in the Untrusted Zone. With the possible exception of national security headquarters, offices do not have perfect screening. You may decide, therefore, that Wi-Fi LANs are always operating in an untrusted zone. You can get around this by using VPN, but that might slow down communication, demand a high capacity VPN server, and limit the types of operation that can be performed.
+2. Make Wi-Fi LAN Trusted. Make the Wi-Fi LAN itself fundamentally impenetrable by enemies. You can make Wi-Fi LANs as trusted as wired LANs by making it very difficult to decode the wireless signals.
 
 Hvorfor er Wi-Fi sårbar mot angrep?
 -----------------------------------
 
 Bruker radiobølger. Enhver kan lytte. Dette krever en ny måte å tenke, siden det er enormt forskjellig fra før, der mediet i seg selv var lukket i mye større grad. 
+
+Generelt for trådløs kommunikasjon: Ikke-detekterbar passiv og lavrisiko aktive angrep. Muliggjør man-in-the-middle-angrep. Også mulig med angrep som jamming og elektromagnetisk "bombing". Mange klienter benytter en basestasjon/aksesspunkt. Mobilitet, roaming.
 
 Hva er hovedkategoriene for angrep?
 -----------------------------------
@@ -652,6 +689,11 @@ AP annonserer periodiske sin tilstedeværelse i korte meldinger kalt _beacons_. 
 Når en STA er klar for å koble til en AP, sender den en _authenticate request message_ til AP-en. AP responderer på denne ved å sende en aksept. Nå har STA tillatelse til å koble til AP, men en assosiasjon settes opp før den kan sende og motta data fra nettverket. STA sender en _association request_ og AP svarer med en _association response_.
 
 Roaming. STA sender _disassociation message_ til gammel AP, og _reassociation message_ til ny. Sistnevnte inneholder informasjon som muliggjør smoothere handover.
+
+Beskriv kort arkitekturen i IEEE 802.11
+---------------------------------------
+
+To laveste nivå av referansemodell. Tilsvarende Physical og Data Link i OSI.
 
 Hvilke type meldinger finnes i IEEE 802.11?
 -------------------------------------------
