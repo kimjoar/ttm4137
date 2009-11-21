@@ -137,6 +137,14 @@ Mål i 1999-standarden inkluderer rimelig sterk, selvsynkronisering, effektiv og
 * Autentiseringsfase. Bevise sin identitet til hverandre. Problem: ingen hemmelig token, altså ingen måte å vite at etterfølgende meldinger kommer fra samme enhet. Meningsløst. Med delt nøkkel er målet at mobil enhet skal vise at den har nøkkelen. AP sender plaintext, får tilbake ciphertext. Snilt for hackere.
 * Krypteringsfase. Benytter RC4. Enkel å implementere. Rask. Initialisering og kryptering skjer på hver pakke. 24 bit til initialiseringsvektor (IV). IV endres for hver pakke, og sendes sammen med pakken. Gjør at samme plaintext gir forskjellige ciphertext. Nøkkel til RC4 er sammensatt av hemmelig nøkkel og IV. Problemet er at IV aldri bør brukes mer enn én gang per nøkkel. I WEP er det 24 bit, dvs ca 17 mill IV-verdier. Mange systemer starter med samme IV etter oppstart, og benytter et pseudorandom bytte.
 
+### Svakheter
+
+* IV for kort
+* Svake nøkler på grunn av oppbygningen (FMS-angrepet)
+* Ingen deteksjon av tampering
+* Bruker master key direkte
+* Ingen beskyttelse mot replay
+
 Hva er forskjellen på default keys og key mapping keys?
 -------------------------------------------------------
 
@@ -489,7 +497,53 @@ The communication period a cryptokey is used/valid.
 Hva er TKIP?
 ------------
 
+TKIP = Temporal Key Integrity Protocol. Eksistrer for å oppgradere og sikre WEP-systemer. Er en del av RSN i IEEE 802.11i.
 
+Et Wi-Fi LAN-kort består av fire deler:
+
+* RF. Sende og motta.
+* Modem. Hente ut data fra mottatt signal.
+* MAC (Medium Access Control). Protokoll-greier, inkludert WEP-kryptering.
+* Host interface. Koble til ekstern enhet.
+
+Det er MAC-en som implementerer IEEE 802.11-protokollen. MAC ligger på en IC, rundt en mikroprosessor. 
+
+### Integrity
+
+Trengte en måte å lage en MIC som ikke trengte multiplikasjon eller nye krypto-algoritmer. Løsningen heter Michael, som kun består av shift- og add-operasjoner. Problemet er at Michael er sårbar mot brute force-angrep, men gjør opp for dette med _countermeasures_. Dette går ut på å ha en pålitelig måte å detektere angrep. Michael opererer på MSDU-er. Dette reduserer overhead siden man ikke trenger en MIC per fragment (MPDU). TKIP-kryptering gjøres derimot på MPDU-nivå. 
+
+### Valg og bruk av IV
+
+* I WEP var det ingen krav til hvordan IV velges. I TKIP er det et krav til at man begynner på et tilfeldig tall, og inkrementerer med 1 for hver nye IV. 
+* Utvidet fra 24 bit i WEP til 48 bit i TKIP (Egentlig 56 bit, men forkaster 1 byte på grunn av svake nøkler.)
+* IV brukes sekundært som sekvensteller for å unngå replay-angrep.
+* IV er konstruert for å unngå svake nøkler.
+
+### TKIP Sequence Counter (TSC)
+
+Samme som IV. Brukes til å skjerme mot replay-angrep.
+
+Problem: Burst-ack. Sender mange meldinger på en gang (opp til 16). Dersom noen av pakkene tapes på turen, spesifiseres det hvilke som må sendes på nytt. Dersom f.eks. første pakke ble mistet, får man et problem når den gjensendes siden mottaker egentlig kun godtar >= tidligere TSC-verdi. Løser dette med replay-vindu. Dette vinduet godtar alt mellom største mottatte verdi og 16 mindre enn denne verdien.
+
+Beskriv FMS-angrepet
+--------------------
+
+Beskriv per-packet key mixing i TKIP
+------------------------------------
+
+Økningen i IV-lengde skapte problemer, siden legacy-systemer antok den gamle måten, altså en 64 bits RC4, ikke 88 bits. De løste dette ved å dele den 48 bit lange IV-en i to deler. De første 16 bit paddes til 24 bit, og inkluderes som før. Mixer så sammen dette med de resterende 32 bitene. 
+
+![Per-packet key mixing](http://github.com/kjbekkelund/ttm4137/raw/master/media/per-packet-key-mixing.png)
+
+Hvorfor er IV viktig?
+---------------------
+
+
+
+Hvorfor gir ikke ICV i WEP noen beskyttelse?
+--------------------------------------------
+
+(s 235)
 
 Hvorfor ble TKIP byttet ut med CCMP?
 ------------------------------------
@@ -497,6 +551,15 @@ Hvorfor ble TKIP byttet ut med CCMP?
 Den eneste grunnen til at TKIP ble benyttet i WPA var at protokollen måtte bygge på samme hardware som WEP. AES-basert sikkerhet kan generelt sees som sikrere enn TKIP-basert sikkerhet, men det betyr _ikke_ at TKIP er usikker. CCMP var spesialbygd for RSN fra grunnen av.
 
 AES er ikke en sikkerhetsprotokoll, men et blokkcipher. I RSN er sikkerhetsprotokollen CCMP, som definerer et seg med regler for kryptering og sikring av IEEE 802.11 frames.
+
+På hvilken måte er TKIP forskjellig fra WEP?
+--------------------------------------------
+
+* Message integrity. Prevent tampering.
+* Nye regler for hvordan IV velges og gjenbrukes.
+* Endrer krypteringsnøkkel for hver frame.
+* Større IV.
+* Nøkkelstyring.
 
 Beskriv AES
 -----------
@@ -584,3 +647,29 @@ Dekryptering:
 * Sjekker om PN > tidligere mottatt PN
 * Dekrypterer ved bruk av AES i counter-mode.
 * Sjekker MIC mot mottatte felt
+
+Beskriv Man-in-the-Middle-angrepet på UMTS
+------------------------------------------
+
+![UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts.png)
+
+### Hvorfor mulig?
+
+For å gjøre et MitM-angrep må angriperen imitere et gyldig nettverk. Ved kun UMTS-utstyr er ikke dette mulig på grunn av to sikkerhetsmekanismer:
+
+1. Autentiseringstegn (AUTN). Sikrer at tegnet er nytt og at det kommer fra riktig plass. Gjøres ved sekvensnummer (SQN) og meldingsautentiseringskode (MAC). Beskytter dermed mot replay av autentiseringsdata. 
+2. Integritetsbeskyttelse i steg 12. Forhindrer angriper å videresende korrekt autentiseringsinformasjon samtidig som de respektive parter blir lurt til å ikke bruke kryptering.
+
+![Authentication and key agreement in standard UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/auth-and-key-agreement-umts.png)
+
+![Authentication and key agreement in UMTS with GSM components](http://github.com/kjbekkelund/ttm4137/raw/master/media/auth-and-key-agreement-umts-with-gsm.png)
+
+### Gjennomføring
+
+Tre deler:
+
+1. Få tak i MS sin IMSI. Kan gjøres ved å initiere autentiseringsprosedyre før angrepet starter. Dette gjøres ved å imitere en GSM basestasjon. Kobler av etter mottatt IMSI.
+2. Angriper handler på vegne av MS for å få en gylding autentiseringstoken (AUTN) fra et ekte nettverk. Ingen av disse meldingene er sikret. ![Obtain valid AUTN](http://github.com/kjbekkelund/ttm4137/raw/master/media/obtain-valid-autn.png)
+3. Imiterer en GSM basestasjon som MS kobler på. Velger i steg 6 å bruke "No encryption". ![Impersonate valid GSM base station](http://github.com/kjbekkelund/ttm4137/raw/master/media/impersonate-valid-gsm.png)
+
+Dette angrepet gjør det ikke mulig for angriperen å skape en kobling mellom MS og en ekte basestasjon, og for å få en "vanlig" kobling må angriperen lage en kobling til et ekte nettverk for å videresende trafikk.
