@@ -725,3 +725,212 @@ To til fire adresser per header:
 Enkelt for andre å late som de er andre ved å benytte deres MAC-adresse.
 
 Styringsrammer, men ikke kontroll- og datarammer, er viktige med tanke på sikkerhet. Består av to deler; et sett med bestemte felt, og elementer. Et element er en (self-contained) pakke med informasjon. Gjør at standarden enklere kan oppdateres. Første byte identifiserer type, det andre lengde. 
+
+Hvordan er sikkerheten i GSM?
+-----------------------------
+
+Målet i GSM var at sikkerheten skulle være på linje med kablede nett, og at det ikke skulle gå ut over brukervennligheten til systemet.Det har vært oppdateringer, men basisstrukturene har holdt seg. Det trekker fram et viktig moment innenfor sikkerhet: det er ikke nok at systemer beskytter mot dagens løsninger, de må også være tilpasselig til nye sikkerhetsproblemer som kan komme i fremtiden.
+
+De viktigste sikkerhetsfunksjonene i GSM:
+
+* Autentisering av bruker
+* Kryptering av informasjon i radiogrensesnittet
+* Bruk av temporære identiteter
+
+På den andre side er de mest kritiserte funksjonene:
+
+* Aktive angrep på nettverket er mulig, for eksempel man-in-the-middle.
+* Sensitiv kontroll data, som nøkler brukt til kryptering, er sendt mellom forskjellige nettverk uten å bære kryptografisk beskyttet.
+* Essensielle deler av sikkerhetsarkitekturen holdes hemmelig.
+
+Hvordan gjøres autentisering av bruker i GSM?
+---------------------------------------------
+
+Permanent hemmelig nøkkel Ki for hver bruker ligger lagret i brukerens SIM-kort og i Authentication Center (AuC). Autentisering gjøres ved å se om brukeren har nøkkelen Ki. Dette gjøres ved å utfordre brukeren til å gjøre en beregning basert på Ki på følgende måte: En 128-bits random streng (RAND) sendes til mobiltelefonen. I SIM-kortet er det en enveis-funksjon kalt A3. Den tar inn Ki og RAND, og returnerer en 32-bits verdi (SRES, signed response), som blir sendt tilbake til nettverket.
+
+Det lages også en temporær sesjonsnøkkel Kc, som genereres av enveisfunksjonen A8, med samme input-parametre som A3. Denne nøkkelen brukes til å kryptere informasjonen som går over radiogrensesnittet. Autentiseringstriplet (RAND, SRES, Kc) sendes til MSC/VLR eller SGSN (for GPRS) fra AuC-en. 
+
+![Autentisering i GSM](http://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-authentication.png)
+
+Hvordan krypteres informasjonen som sendes i GSM?
+-------------------------------------------------
+
+Kc blir etablert i autentiseringen. Denne brukes sammen med krypteringsalgoritmen A5. 
+
+![Kryptering i GSM](http://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-encryption.png)
+
+I GPRS er A5 byttes ut med GEA (GRPS Encryption Algorithm). Dette ble gjort siden termineringspunktet for kryptering ble flyttet dypere i nettverket, fra basestasjonen til SGSN. I GSM gjøres kryptering på det fysiske laget, mens det i GPRS gjøres på det logiske link-laget (LLC, lag 3).
+
+Beskriv sikkerhetsfunksjonaliteten i UMTS Release 1999
+------------------------------------------------------
+
+Når 3G introduserer skiftes det fra TDMA til WCDMA. Kravene til aksess-sikkerhet holdes derimot fast.
+
+* Konfidensialitet av telefonsamtale og data er beskyttet av Radio Access Network (RAN). 
+* Personvernet til hvor en bruker befinner seg er generelt verdsatt
+* Sikringen av data er kritisk når den sendes gjennom nettverket
+
+### Gjensidig autentisering
+
+![Gjensidig autentisering i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/mutual-auth-umts.png)
+
+UEs sjekk av SN gjøres ved hjelp av AUTN. Master-nøkkel er 128 bit, hemmelig, og delt mellom UE og AuC. I tillegg til autentisering utledes temporære 128 bits nøkler til kryptering og integritetssjekk. UE verifiserer at AuC har generert AUTN ved å gjøre beregninger på AUTN og RAND. Nøklene til RAN kryptering og intergritetssjekk (CK og IK), lages også i autentiseringsprosessen. Det er i RNC at kryptering og integritetsbeskyttelse starter. 
+
+### Generering av autentiseringsvektor
+
+* AMF = Authentication Management Field. 
+* 128 bit RAND
+* 64 bit MAC
+* 32-128 bits XRES
+* 128 bits CK
+* 128 bits IK
+* 64 bits AK = Anonymity Key
+* 48 bits SQN
+* AUTN = SQN (xor) AK || AMF || MAC
+
+![Generering av autentiseringsvektor i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-autentication-vector.png)
+
+### Autentisering hos USIM
+
+Samme funksjoner f1-f5. 
+
+Figur 2.4 s 35
+
+Dersom XMAC og MAC er lik, impliserer det at RAND og AUTN ble laget av samme entitet som vet K, altså AuC.
+
+### Generering av SQN i AuC
+
+To basis-strategier:
+
+* Hver bruker har en individuell SQN
+* SQN-generering er basert på global teller
+
+SQN = SEQ || IND. IND = 5 bits. Brukes for å tillate effektive mekanismer hos USIM for å sjekke freshness. Generell regel: syklisk inkrementert med 1 per autentiseringsvektor. Når AuC får beskjed om hvilken node som spør etter vektor, kan det være nyttig å differensiere IND-verdier. Vektorer kan sendes i batcher, noe som reduserer AuC-aksesser, der typisk alle deler samme SEQ, men ikke samme IND. Tre strategier for valg av SEQ:
+
+* SEQ er individuell teller. 
+* SEQ er basert på global teller, og differanse for hver bruker holdes i database.
+* SEQ = SEQ1 || SEQ2, der SEQ1 (19 bits) er individuell og SEQ2 (24 bits) basert på global teller (GLC, 24 bits). SEQ1 konstant til SEQ2 wrapper rundt. SEQ2 korrelerer sterkt med GLC.
+
+### Sjekking av SQN i USIM
+
+Gjør det mulig for USIM å sjekke om autentiseringsutfordringen er mottatt før. USIM har en array indeksert på IND, som brukes til å sjekke SQN verdi for den IND-verdien. Dersom SQN er større, aksepteres den. Dersom den ikke er det, må resynkronisering gjøres. 
+
+### Synkronisering av SQN
+
+Dersom SQN verdien ikke er synkronisert mellom USIM og AuC, er det mulig at autentisering vil feile. Dersom dette skjer, kan resynkronisering gjennomføres. Dette gjøres ved å sende en AUTS, som inneholder:
+
+* SQN fra USIM sikret ved å benytte AK
+* MAC-S ved å bruke f1* på SQN, K, RAND og AMF. f1* er forskjellig fra f1. 
+
+Når AuC mottar AUTS, regner den først ut SQN-verdien til USIM. Basert på denne sjekkes det om neste autentiseringsvektor vil være akseptabel for USIM. 
+
+* Dersom den er det sendes en batch med nye autentiseringsvektorer til VLR/SGSN. 
+* Dersom ikke sjekkes MAC-S. Om den er korrekt settes SQN i AuC-en til SQN-verdien fra USIM. Om den ikke er korrekt nullstilles ikke SQN-verdien til AuC-en. I begge tilfeller sendes en batch med nye autentiseringsvektorer.
+
+Etter resynkronisering vil UE kunne autentiseres. Dersom flere autentiseringsforsøk feiler, er det mest sannsynlig noe galt med utregninger eller data i USIM, eller at UE er en angriper som prøver å gjøre et DoS-angrep. 
+
+### Flow chart
+
+![UMTS-autentisering](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-authentication-flowchart.png)
+
+### Temporære identiteter
+
+SN har oversikt over IMSI og TMSI for hver bruker, der IMSI er global for bruker og TMSI er lokal. For hver gang en bruker kobler på et nettverk får den tilsendt en ny TMSI etter at kryptering er på plass. SN får IMSI ved at Location Area Identity (LAI) eller Routing Area Identity (RAI) sendes med TMSI, slik at SN vet hvem de skal kontakte får å få tak i IMSI. Samtidig kan autentiseringsvektorer overføres. Dersom man ikke klarer å få tak i tidligere nettverk, må brukeren spørres etter IMSI.
+
+### Kryptering av UTRAN
+
+Figur 2.15 s 58
+
+Før kryptering starter må enhetene bli enig om algoritme. Kun én definert i UMTS 1999, jobbes mot å definere én til.
+
+Kryptering og dekryptering gjøres i UE og RNC (Radio Network Controller). Altså må CK overføres fra Core Network (CN) til Radio Access Network (RAN). Kryptering skjer på MAC (Medium Access Control)-laget eller RLC (Radio Link Control)-laget.
+
+UMTS kryptering gjøres ved et stream-cipher. Dekryptering er samme algoritme.
+
+Figur 2.8, s 45
+
+Krypteringsparametre:
+
+* Kan ikke bruke Connection Frame Number (CFN) i MAC eller RLC-SN i RLC siden de wrapper rundt veldig fort. Bruker derfor Hyper Frame Number (HFN). Inkrementeres hver gang de førstnevnte wrapper. Kombinasjonen kalles COUNT-C. Settes til 0 hver gang en ny nøkkel genereres.
+* _Radio bearer_-identiteten trengs, siden disse tellerene er opprettholdt uavhengig av hverandre.
+* DIRECTION sier om krypterinen er uplink eller downlink. 
+* LENGTH = lengden av dataen som skal krypteres.
+* Algoritmen er f8. Offentlig tilgjengelig, basert på KASUMI. 64 bit inn -> 64 bit ut. Kontrolleres av 128 bit CK.
+
+Protokollstruktur:
+
+* Protokollene i RAN er delt i tre lag: physical layer, link layer (delt i MAC, RL, PDCP, BMC), network layer (delt i flere lag, blant annet RRC). Der er i RRC UTRAN terminerer i RNC. Høyere lag terminerer i CN.
+* Physical layer konverterer fysiske radiokanaler til transportkanaler. Terminerer i BS, altså ble termineringspunktet til UMTS flyttet til RNC. 
+* MAC koverterer transportkanaler til logiske kanaler. Delt i trafikk-kanaler og kontroll-kanaler. Dette laget gjør kryptering i transparent RLC-modus. 
+* RLC segmenterer og setter sammen PDU-er fra høyere lag. Står for kryptering i _acknowledged_ eller _unacknowledged_ modus. 
+* RRC står for krypteringskontroll, altså om kryptering skal være av eller på mellom UE og RNC. I tillegg til å gjennomføre intergritetsbeskyttelse.
+* UE kan ha to moduser i UTRAN: _idle_ eller _connected_. Starter i idle-modus, og går over i connected når en RRC-kobling er satt opp mellom UE og RNC. I idle kan UE kun identifiseres av CN-identiteter som IMSI og TMSI. I connected kan den også identifiseres med UTRAN-identieten Radion Network Temporary Identity (RNTI).
+
+### Integritetsbeskyttelse av RRC-signalering
+
+Målet er å autentisere individuelle kontrollmeldinger. Stenger for man-in-the-middle. Implementert på RRC-laget, altså mellom UE og RNC. Basert på en message autentication code. Er 32 bit og laget ved å benytte f9. KASUMI kan også benyttes. Meldinger som sendes før IK er på plass er ikke integritetsbeskyttet. 
+
+![MAC i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-mac.png)
+
+Integritetssjekk gjøres ikke på brukerplanet, men det gjøres en periodisk lokal autentisering. Initialiseres av RNC når COUNT-C når en viss kritisk verdi. Sender da en _counter check_ som inneholder mest signifikante del av COUNT-C. UE sammenligner med sin egen COUNT-C. Differanse reporteres tilbake. Dersom det er forskjell, kan RNC kutte koblingen. Dette gir beskyttelse mot en angriper som prøver å sette inn eller slette datapakker. 
+
+### Sikkerhetsmekanismer i UTRAN
+
+Kryptering er ikke påkrevd, men integritetssjekk er. Dersom UE og nettverket ikke har noen felles integritetssjekk-algoritmer, brytes kobling. Alle som følger UMTS 1999 må støtte UIA1.
+
+RNC er felles for både PS- og CS-domenet, altså trengs ikke forskjellig algoritme for de to domenene.
+
+### Sammendrag
+
+![Sammendrag av aksess-sikkerhet i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-access-security-summary.png)
+
+Beskriv hvordan GSM samvirker med UMTS
+--------------------------------------
+
+Radiointerfacene er forskjellige, og siden sikkerhetsfunksjonaliteten også er forskjellig, er det vanskelig å definere hvordan sikkerheten skal være når de samvirker. Når et SIM-kort benyttes, vil det ikke være noen autentisering av nettverket, kun den mobile enheten. Dette er på grunn av at det bare er 64 bit nøkkelmateriale, og to 128 bits nøkler trengs. Som følge av dette utvides 64 bit-nøkkelen til 256 bit, slik at den kan benyttes i UTRAN, men gir ikke mer sikkerhet enn GSM. 
+
+Entiteter, 2G vs 3G:
+
+* Sikkerhetsmodul. SIM i 2G, UICC i 3G.
+* Mobilenhet. 2G dersom det kun støtter GSM RAN.
+* Radionettverk. GSM Base Station Subsystem i 2G, UTRAN i 3G.
+* Serving CN. SN VLR/SGNS er 2G dersom den kun støtter GSM autentisering. 
+* Hjemmenettverk. 2G dersom det kun støtter triplet, 3G dersom det støtter kvintett.
+
+Figur 2.18 s 66
+
+Tilfeller:
+
+* SIM for å aksessere GSM BSS. Rent GSM-case med hensyn til sikkerhet.
+* UICC og 2G mobilenhetet for å aksessere GSM BSS. 2G-sikkerhet.
+* SIM og 3G mobilenhet for å aksessere UTRAN. GSM krypteringsnøkkel Kc utvides til CK og IK. 2G-autentisering, mens kryptering og integritetsbeskyttelse er 3G med 2G-nøkkel.
+* USIM med 3G mobilenhet for å aksessere GSM BSS med 2G SN. Hjemmenettverket må produsere triplet, siden det er alt SN støtter. USIM bruker konverteringsfunksjon for å finne GSM-nøkkelen Kc. 2G-sikkerhet.
+* USIM med 3G mobilenhet for å aksessere GSM BSS med 3G SN. Mulig å gjøre UMTS AKA, men CK og IK kan ikke brukes. Dersom må konvertering brukes hos både USIM og i CN for å generere Kc. 3G-autentisering, men 2G-kryptering.
+
+Handover fra et system til et annet:
+
+* (CS) Fra UTRAN til GSM BSS. Krypteringsalgoritmer endres fra UEA til A5. Integritetsbeskyttelse stopper. Informasjon om GSM sikkerhetskapabiliteter må overføres før handover kan skje.
+* (CS) Fra GSM BSS til UTRAN. Krypteringsalgorime endres fra A5 til UEA. Før handover ber GSM BSS om informasjon om UTRAN sikkerhetskapabiliteter, samt assosierte parametre. Denne informasjonen overføres til RNC-en.
+* (PS) Dersom UE flytter til område med ny MSC, vil fortsatt den gamle MSC/VLR være ankerpunkt. Dersom den flytter til ny SGSN, vil denne SGSN-en bli ankerpunkt.
+
+Hva er MAPsec?
+--------------
+
+MAP = Mobile Application Part. SS7-protokoll som benyttes i GSM og UMTS. Brukes for å aksessere VLR, HLR, MSC, AuC, osv.
+
+MAPsec er introdusert for å beskytte eksisterende globale nettverk med MAP-kapable nettverkselement (NE). Beskyttelse mot aktive angrep vil være vanskelig fram til det er utbredt støtte for MAPsec. 
+
+En plaintext MAP-melding krypteres og puttes i en annen MAP-melding sammen med en MAC av meldingen. MAPsec benytter sammen Sikkerhetsassosiasjon-notasjon som IPsec. Disse inneholder kryptografiske nøkler og annen relevant sikkerhetsinformasjon (eks krypteringsalgoritme, integritetsalgoritme, protection profile ID, protection profile revision ID, soft expiry time, hard expiry time). Hvordan disse overføres mellom operatører er ikke spesifisert i 3GPP Release 4. Etter å ha nått soft expiry time kan ikke sender benytte SA, og etter hard expiry time skal den ikke benyttes i det hele tatt.
+
+Basiselementet i automatisk nøkkelhåndtering i MAPsec er Key Administration Center (KAC). Disse blir enige om SA-er ved å benytte Internet Key Exchange (IKE). KAC-er distribuerer SA-er til NE. Det er nettverk, ikke individuelle NE-er, som adresseres av MAP-meldinger. 
+
+Tre beskyttelsesmoduser: Ingen sikkerhet, kun integritetsbeskyttelse, og kryptering og integritetsbeskyttelse. Sistnevnte har følgende struktur: sikkerhetsheader || f6(plaintext) || f7(sikkerhetsheader || f6(plaintext)), der f6 er AES i counter-mode og f7 er AES i CBC-MAC-mode. I alle tre tilfeller består meldingen av en sikkerhetsheader og en beskyttet payload. Sikkerhetsheader består av SPI (Security Parameter Index) og PLMN (Public Land Mobile Network), som sammen viser til en unik MAPsec SA. I tillegg inneholder den _Original Component ID_, som refererer til typen til den originale MAP-meldingen; TVP (Time Variant Parameter) som gir beskyttelse mot replay-angrep; NE-ID som identifiserer nettverkselementet som sender meldingen; og Prop som er et proprietært felt for lokal bruk.
+
+Av ytelsesgrunner er det er kun noen MAP-operasjoner som beskyttes. Forskjellige komponenter har forskjellige beskyttelsesmoduser. Dette har ført spesifikasjon av _protection profile_. Disse spesifiserer grad av beskyttelse og beskyttelsesmodus for hver MAP-komponent. 
+
+Automatisk nøkkelhåndtering er inkludert i Release 6. En KAC brukes for å forhandle SA-er på vegne av NE-er. KAC har også en SA-database og en Security Policy-database. SA-er er gyldige på en PLMN-til-PLMN-basis. SA-er og policy-er distribueres av KAC over Ze-interfacet. Når NE skal kontake annen NE, begynner den med å sjekke lokal database. Finner den ikke noe der, tar den kontakt med KAC. Dersom det ikke eksiterer der, begynner SA-forhandling med annen PLMN. 
+
+Sikkerhet i IMS
+---------------
+
+IMS er et komplett applikasjonslag-system bygd på toppen av UMTS PS-domenet. Støtter idag UTRAN og GERAN, men kan støtte andre, som for eksempel WLAN, i framtiden. Essensielt i IMS er SIP (Session Initiation Protocol), som håndterer IP-sesjoner. 
