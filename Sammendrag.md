@@ -588,144 +588,6 @@ Tre deler:
 
 Dette angrepet gjør det ikke mulig for angriperen å skape en kobling mellom MS og en ekte basestasjon, og for å få en "vanlig" kobling må angriperen lage en kobling til et ekte nettverk for å videresende trafikk.
 
-Cursory
-=======
-
-Bakgrunnsinformasjon.
-
-Hva er de seks prinsippene for sikkerhetstenkning?
---------------------------------------------------
-
-1. Ikke snakk til noen du ikke kjenner. For a Wi-Fi LAN, it is not enough to verify the identity of the other party. A Wi-Fi LAN must also verify that every message really came from that party.
-2. Godta ingenting uten garanti. Means a guarantee of authenticity. Ingen endring. 
-3. Behandle alle som en fiende til det motsatte er bevist.
-4. Ikke stol på vennene dine for lenge. "Friends" in a Wi-Fi LAN can be identified because they possess tokens such as a secret key that can be verified. Such tokens, whether they are keys, certificates, or passwords, need to have a limited life. Renew tokens periodically.
-5. Bruk gjennomprøvde løsninger.
-6. Se etter sprekker i bakken du står på. The challenge for hackers, of course, is to look for the little cracks and crevices that result from hidden assumptions.
-
-Begreper
---------
-
-* Threat model. The basis for designing and evaluating security. Identify all the threats against which we plan to defend.
-* Security protocol. Real security is provided by a set of processes and procedures that are carefully linked together.
-* Key Entropy. The number of possible key values determines the strength of the key.
-
-Tradisjonell sikkerhetsarkitektur
----------------------------------
-
-The traditional approach for network security is to divide the network into two zones: trusted and untrusted. There is no need for network security protection within the trusted zone because there are no enemies present. By contrast, you regard the untrusted zone as full of enemies.
-
-![Conventional Security Architecture](http://github.com/kjbekkelund/ttm4137/raw/master/media/conventional-security-architecture.png)
-
-How does Wi-Fi LAN fit into this conventional security architecture?
-
-1. Put Wireless LAN in the Untrusted Zone. With the possible exception of national security headquarters, offices do not have perfect screening. You may decide, therefore, that Wi-Fi LANs are always operating in an untrusted zone. You can get around this by using VPN, but that might slow down communication, demand a high capacity VPN server, and limit the types of operation that can be performed.
-2. Make Wi-Fi LAN Trusted. Make the Wi-Fi LAN itself fundamentally impenetrable by enemies. You can make Wi-Fi LANs as trusted as wired LANs by making it very difficult to decode the wireless signals.
-
-Hvorfor er Wi-Fi sårbar mot angrep?
------------------------------------
-
-Bruker radiobølger. Enhver kan lytte. Dette krever en ny måte å tenke, siden det er enormt forskjellig fra før, der mediet i seg selv var lukket i mye større grad. 
-
-Generelt for trådløs kommunikasjon: Ikke-detekterbar passiv og lavrisiko aktive angrep. Muliggjør man-in-the-middle-angrep. Også mulig med angrep som jamming og elektromagnetisk "bombing". Mange klienter benytter en basestasjon/aksesspunkt. Mobilitet, roaming.
-
-Hva er hovedkategoriene for angrep?
------------------------------------
-
-1. Snooping. Aksessere privat informasjon. Kryptering kan brukes for å gjøre det vanskelig å få tak i informasjonen.
-2. Modifications. Modifisering av data, f.eks. destinasjonsfeltet (IP-address) i en melding eller innholdet i epost-er.
-3. Masquerading. Maskeres seg som en gyldig enhet. Ideell fremgangsmåte dersom angriperen ønsker å forbli umerket. Kan bruke dette til å for eksempel få tak i innloggingskredentialer. 
-4. Denial of Service. Forskjellig fra 1-3, hovedsakelig med tanke på at den prøver å blokkere alle, også seg selv, istedenfor å gi seg selv mer adgang, slik målet er i de andre typene angrep.
-
-Hvilke angrep er mulig uten nøkkel?
------------------------------------
-
-### Snooping
-
-Ved å snuse rundt kan man kun finne ut informasjon om hvordan, når, og fra hvilke enheter nettverket brukes. Begrenset bruk, men kan være verdifullt sammen med annen informasjon en angriper kan få tak i.
-
-En angriper kan blant annet finne ut:
-
-* Leverandør av aksesspunkt ved å benytte MAC-addressen. Modell kan muligens finnes ved å se på funksjonalitet eller proprietær informasjon i beacon.
-* Trafikkanalyse kan gi informasjon om hvordan nettverket brukes, f.eks. antall brukere, når nettverket bruker, osv.
-* Dersom WEP benyttes, kan man se om flere brukere benytter samme nøkkel.
-
-### Man-in-the-Middle
-
-Kan benyttes til å modifisere meldinger i transitt uten at det detekteres. Det er to måter å modifisere: Enten kan det gjøres on-the-fly eller man kan fange, modifisere, og gjenspille meldingen (store-and-forward).
-
-For å gjøre et store-and-forward-angrep i Wi-Fi må angriperen stoppe den intielle meldingen, slik at modifikasjoner kan gjøres på den før den videresendes til brukeren.
-
-(Figur av liste)
-
-En annen måte å gjøre dette, er ved å sette opp et falsk aksesspunkt. Det falske aksesspunktet identifiseret et ekte aksesspunkt. Når en enhet prøver å koble til det falske aksesspunktet, modifiseres meldingen blant annet med å substituere inn sin egen MAC, og videresendes så til det ekte aksesspunktet. Gjør det samme med data andre vei. Har ikke nøkkel, så har bare kryptert data.
-
-Hvilke angrep er mulig på nøklene?
-----------------------------------
-
-Mennesket er ofte det svakeste ledd i sikkerhet. For å unngå dette problemet, kan man bruke engangspassord. Eks: Bank-ID. Nøkkelen er kun aktiv i noen minutter, noe som gjør at det har begrenset verdi.
-
-Man kan "begrave" nøkkelen, slik man for eksempel gjør i SIM-kort. Nøkkelen gjøres utilgjengelig for utenomverden. Men det er fortsatt essensielt å endre passord fra tid til annen.
-
-Trådløshet introduserer helt nye problemer. Lett å få tilgang til datastrømmene, selv om de er krypterte. 
-
-Hva er infrastruktur-modus og ad-hoc-modus?
--------------------------------------------
-
-Når IEEE 802.11-systemer arbeider gjennom et aksesspunkt, opererer de i infrastruktur-modus (ESS). Koordineringen av Wi-Fi LAN-et gjøres av aksesspunktet fra et bestemt punkt, og har ofte koblingen til Ethernett-nettverket.
-
-I ad-hoc-modus (IBSS) er det derimot ikke noe aksesspunkt, og hver trådløs-enhet kan sende direkte til hvilken som helst annen enhet.
-
-Forklar basisoperasjon i infrastruktur-modus
---------------------------------------------
-
-* AP = Fixed Access Point
-* STA = (Station) Wireless Device
-
-AP og STA snakker med hverandre ved å bruke trådløse meldinger. AP er koblet til (wired) nettverket STA ønsker å aksessere.
-
-AP annonserer periodiske sin tilstedeværelse i korte meldinger kalt _beacons_. Gjør at STA kan avdekke identiteten til AP. En STA søker etter AP. Flere forskjelllige frekvenser (kanaler) kan bruker, så STA-en må lytte på hver av disse. Dette kalles skanning. 
-
-Når en STA er klar for å koble til en AP, sender den en _authenticate request message_ til AP-en. AP responderer på denne ved å sende en aksept. Nå har STA tillatelse til å koble til AP, men en assosiasjon settes opp før den kan sende og motta data fra nettverket. STA sender en _association request_ og AP svarer med en _association response_.
-
-Roaming. STA sender _disassociation message_ til gammel AP, og _reassociation message_ til ny. Sistnevnte inneholder informasjon som muliggjør smoothere handover.
-
-Beskriv kort arkitekturen i IEEE 802.11
----------------------------------------
-
-To laveste nivå av referansemodell. Tilsvarende Physical og Data Link i OSI.
-
-Hvilke type meldinger finnes i IEEE 802.11?
--------------------------------------------
-
-1. Control. Korte meldinger for start og stopp sending av informasjon, samt om det har vært en kommunikasjonsfeil.
-2. Management. Brukes av AP og STA for å forhandle og kontrollere forhold. 
-   * Beacons. AP annonserer periodiske sin tilstedeværelse. Inneholder informasjon som nettverksnavn og funksjoner i AP.
-   * Probing. En STA kan sende en _probe request message_. Dersom AP mottar, sendes umiddelbart en respons. Slik kan STA finne AP hurtig uten å søke gjennom alle kanaler og vente på beacon.
-3. Data. Sendes vanligvis mellom STA og AP, også når mottaker er en annen STA. AP videresender. IEEE 802.11 datarammer som går til eller fra AP har tre adresser; kilde, mål og mellomliggende (dvs AP den går gjennom).
-
-Forklar MAC (header) i IEEE 802.11
-----------------------------------
-
-MAC-headeren er en del av det generelle formatet på rammer i IEEE 802.11.
-
-![Generelt format på rammer i IEEE 802.11](http://github.com/kjbekkelund/ttm4137/raw/master/media/basic-frame-format-802-11.png)
-
-Tre typer basert på om det er snakk om en kontrollramme, styringsramme eller dataramme. Viktigste del: adresser. 6 byte per adresse. Hver enhet har en unik adresse spesifisert under produksjon. Destinasjon kan være unikast eller multikast.
-
-To til fire adresser per header:
-
-* Transmitter address (TA)
-* Receiver address (RA)
-* Source address (SA)
-* Destination address (DA)
-
-(AP til AP-kommunikasjon ikke fullt spesifisert i standarden, og det er få implementasjoner.)
-
-Enkelt for andre å late som de er andre ved å benytte deres MAC-adresse.
-
-Styringsrammer, men ikke kontroll- og datarammer, er viktige med tanke på sikkerhet. Består av to deler; et sett med bestemte felt, og elementer. Et element er en (self-contained) pakke med informasjon. Gjør at standarden enklere kan oppdateres. Første byte identifiserer type, det andre lengde. 
-
 Hvordan er sikkerheten i GSM?
 -----------------------------
 
@@ -778,13 +640,13 @@ UEs sjekk av SN gjøres ved hjelp av AUTN. Master-nøkkel er 128 bit, hemmelig, 
 
 ### Generering av autentiseringsvektor
 
-* AMF = Authentication Management Field. 
+* AMF = Authentication Management Field, 16 bit
 * 128 bit RAND
 * 64 bit MAC
-* 32-128 bits XRES
+* 32-128 bits XRES, multiple av 8 bit
 * 128 bits CK
 * 128 bits IK
-* 64 bits AK = Anonymity Key
+* 48 bits AK = Anonymity Key
 * 48 bits SQN
 * AUTN = SQN (xor) AK || AMF || MAC
 
@@ -933,4 +795,357 @@ Automatisk nøkkelhåndtering er inkludert i Release 6. En KAC brukes for å for
 Sikkerhet i IMS
 ---------------
 
-IMS er et komplett applikasjonslag-system bygd på toppen av UMTS PS-domenet. Støtter idag UTRAN og GERAN, men kan støtte andre, som for eksempel WLAN, i framtiden. Essensielt i IMS er SIP (Session Initiation Protocol), som håndterer IP-sesjoner. 
+IMS er et komplett applikasjonslag-system bygd på toppen av UMTS PS-domenet. Støtter idag UTRAN og GERAN, men kan støtte andre, som for eksempel WLAN, i framtiden. Essensielt i IMS er SIP (Session Initiation Protocol), som håndterer IP-sesjoner. De sentrale elementene i IMS er SIP-servere og SIP-proxyer (CSCF).
+
+Når en UA ønsker tilgang til IMS, lager den først en PDP (Packet Data Protocol)-kontekst med PS-domenet. I denne prosessen brukes gjensidig autentisering, integritetsbeskyttelse og kryptering fra UMTS. UA og Home IMS autentiserer hverandre ved å bruke en permanent, delt masternøkkel. Setter opp temporære nøkler for den videre beskyttelsen av SIP-meldinger. SIP-trafikk mellom besøkt IMS og hjemme-IMS er beskyttet av nettverks-sikkerhetsmekanismer. UA og P-CSCF setter så opp parametre for sikkerhetsmekasismene brukt heretter, før integritetsbeskyttelse mellom dem er satt opp, basert på de temporære nøklene.
+
+Avhenger av tre hovedkomponenter:
+
+* Permanent sikkerhetskontekst mellom UE og HSS. Dette gjøres ved å benytte en IMS Sucsbriber Identity Module (ISIM). Begge inneholder identitet og tilsvarende masternøkkel.
+* Temporær sikkerhetskontekst mellom UA og P-CSCF. Benytter IPsec SA-er. 
+* All trafikk på kontrollplanet mellom nettverksnoder er beskyttet.
+
+### Registrering
+
+To SIP-prosedyrer spiller en sentral rolle i IMS-sikkerhet: REGISTER og INVITE. En IMS Private Indentity (IMPI) er lagret i ISIM og i HSS, i tillegg til en 128 bits masternøkkel og en IMS Public Identity (IMPU). Kan være flere IMPU per IMPI. IMPI er en Network Access Identifier (NAI), mens IMPU er en SIP-URI. 
+
+Før en bruker kan benytte IMS-tjenester må hun aktive registrere seg. Dette gjøres ved å sende en REGISTER til en P-CSCF. REGISTER inneholder både IMPI og minst en IMPU. Når registrering er satt opp deler UE og P-CSCF IPsec ESP SA-er som kan benyttes til å beskytte den videre kommunikasjonen.
+
+![SIP-registrering](http://github.com/kjbekkelund/ttm4137/raw/master/media/sip-register.png)
+
+### Bruken av HTTP Digest AKA
+
+Gjensidig autentisering og nøkkel-enighet (3GPP AKA) gjøres på toppen av HTTP Digest, som er basert på delt passord. 3GPP AKA er ikke basert på delt passord mellom UE og P-CSCF, men permanent delt hemmelighet mellom UE og HSS. Bruker RAND og AUTN som nonce, og RES kalkulert fra RAND som passord. AKA indikeres i algoritme-valget. 
+
+Figur 3.10 s 98
+
+### Oppsett av sikkerhetsmodus
+
+Når aktiveres mekanismer? Når starter beskyttelsen i hver retning? Hvilke parametre er aktivert?
+
+Et åpenbart angrep er å forhindre at mekasismene aktiveres i det hele tatt, for eksempel ved et man-in-the-middle-angrep.
+
+Figur 3.12 s 101
+
+Tre SIP-headere definert med tanke på sikkerhet. Security-Client, Security-Server og Security-Verify. Fem sikkerhetsmekanismer som kan forhandles: TLS, HTTP Digest, IPsec med IKE, IPsec uten IKE, IPsec ESP for å beskytte første IMS-hopp.
+
+### Integritetsbeskyttelse
+
+Gjøres med IPsec ESP. Identiteter i SIP-laget (IMPI, ...) må knyttes til IP-adresser. Dette løses i P-CSCF, som sjekker om IP-adressen brukt for integritetsbeskyttelse i tillatt for gitt IMPI. 
+
+Det er uungåelig at noen SIP-meldinger må sendes uten integritetsbeskyttelse. I IP-laget er det forskjellige porter som differensierer unbeskyttede og beskyttede meldinger. IPsec kommuniserer til SIP-lagert informasjon om IP-adresse og port for hver pakke, slik at det kan verifiseres at pakker sendes til rett port. IPsec passer på at riktig SA benyttes, mens SIP passer på at IP-adresse og port matcher SIP-meldingen.
+
+To par med enveis ESP SA-er benyttes mellom UE og P-CSCF (to fra og to til). 
+
+Parametre: 
+
+* Integritetsbeskyttelse (HMAC-SHA5, HMAC-SHA1) forhandlet mellom UE og P-CSCF
+* SPI valgt av UE for SA-er som går til UE, og av P-CSCF for SA-er som går til P-CSCF.
+* SA-varighet, konstant 2^32-1 i IP-laget, livstid kontrolleres i SIP-laget
+* Modus, alltid transport
+* Nøkkellengde, 128 bit for MD5, 160 for SHA1
+
+IP-adresse og SPI identifiserer unikt SA i IP-laget. Alle SA er lagret i SA-database. Trenger i tillegg en policy-database, som er brukt til å bestemme om beskyttelse trengs for hver innkommende og utgående melding (bindes til IP-adresse, port eller transport-protokoll).
+
+P-CSCF velger to beskyttede porter (port_pc og port_ps), som sendes sikret til IE. Kun beskyttede meldinger kan mottas på disse portene. UE velger så to lokale beskyttede porter (port_uc og port_us). 
+
+P-CSCF opprettholder en database der hver SA kan identifiseres fra UEs IP-adresse og beskyttet port. Inneholder også IMPI og IMPU knyttet til hver SA, samt levetiden til SA. For hver innkommende melding sjekker P-CSCF at den er korrekt. UE inneholder også en database. For hver SA inneholder den beskyttede porter og levetid.
+
+Dersom UE starter en reregistrering samtidig som den allerede er beskyttet av en SA, kan det en periode hver to sett med SA-er. UE sletter det gamle settet når den mottar melding beskyttet av ny SA. 
+
+### Feilhåndtering
+
+Ingen uniform måte å håndtere feil.
+
+* Meldinger med inkorrekt integritet skal forkastes uten videre notifikasjon. 
+* Dersom autentisering feiler (RES != XRES), vil registreringen av IMPI kanselleres og det sendes en respons til UE.
+* Ved feil i nettverksautentisering der MAC i AUTN ikke er korrekt, vil IMPI, som over, kanselleres fra HSS. Dersom grunnen er at SQN ikke godtas, vil resynkronisering starte. 
+* Dersom forslaget fra UE i oppsett av sikkerhetsmodus ikke godtas i P-CSCF, vil feilmelding sendes til UE. Dersom forslaget fra P-CSCF til UE ikke godtas, termineres registreringsprosedyren.
+* Dersom _server list_ returnert til UE ikke er identitiske med sendt, termineres registreringsprosedyren.
+
+Hva er kravene til konfidensialitetsalgoritmen i UMTS?
+------------------------------------------------------
+
+Benytter funksjonen f8, som må være fullt standardisert synkront stream-cipher. Brukes til å beskytte brukerdata og signalering sendt mellom UE og RNC, og er derfor implementert i disse to enhetene. Må kunne implementeres i hardware og software, og ha en krypteringshastighet på rundt 2Mbit/s. 
+
+Tre moduser:
+
+* RLC-transparent. Ny nøkkelstrøm på 10ms trengs for hver fysiske ramme. 
+* Unacknowledged RLC. Ny nøkkelstrøm kreves for hver PDU.
+* Acknowledged RLC. Ny nøkkelstrøm for hver PDU.
+
+(RLC = Radio Link Control)
+
+Figur 6.1, s 137
+
+Input:
+
+* Cipher Key (CK). Fornyes i hver autentiseringsprosess. 128 bit. 
+* COUNT-C, tidsavhengig. 32 bits. Initialisert ved tilkobling.
+* Bearer identity. 5 bits. Samme CK kan benyttes i flere bearers, altså benyttes bearer identity for unikhet.
+* Direction. 0 for uplink (UE -> RNC), 1 for downlink. Brukes for å unngå samme nøkkelstrøm, siden CK kan være lik.
+* Lengde. Heltall mellom 1 og 20000. 16 bits.
+
+Count-C, Bearer og Direction fornyes for hver blokk med nøkkelstrøm.
+
+Beskriv f8 i UMTS
+-----------------
+
+Benytter KASUMI i en blanding av counter- og OFB-modus, men en _pre-whitening_ av feedback-data.
+
+Figur 6.3, s 150
+
+Benytter to 64 bit-registre: det statiske registeret A og telleren BLKCNT. 
+
+* A initaliserer med: IV = COUNT (32 bit) || BEARER (5 bit) || DIRECTION (1 bit) || 0...0 (26 bit)
+* BLKCNT initialiserer med 0
+
+f8 benytter en Key Modifier (KM)-konstant som er satt lik 01010101 repetert 16 ganger. 
+
+Algoritmen starter med at en enkelt operasjon av KASUMI gjøres på registeret A, ved å bruke en modifisert versjon av CK. Dette gir _pre-whitening_-verdien. Fordeler: gir bedre beskyttelse mot chosen plaintext-angrep og kollisjonsangrep. 
+
+![Pre-whitening](http://github.com/kjbekkelund/ttm4137/raw/master/media/pre-whitening-f8.png)
+
+Kryptering og dekryptering er identisk.
+
+Beskriv KASUMI
+--------------
+
+* Opererer på 64 bit data, og produserer 64 bit blokker, basert på en 128 bit nøkkel.
+* Feistel cipher med 8 runder
+* Hver f-funksjon er satt sammen av to funksjoner: FL og FO, der sistnevnte benytter FI.
+
+Figur 7.3, s 179
+
+Hva er kravene til integritetsalgoritmen i UMTS?
+------------------------------------------------
+
+Benytter funksjonen f9, som må være fullt standardisert. Benyttes mellom UE og RNC og å beskytte dataintegritet, samt å autentisere hvor signaleringsdata kommer fra på RRC-laget. Må kunne implementeres i software og hardware.
+
+Figur 6.2, s 140
+
+Genererer MAC av bestemt lengde, 32 bit.
+
+Input:
+
+* Integrity Key (IK). Fornyes i hver autentiseringsprosess. 128 bit.
+* COUNT-I, tids- og rammeavhengig. 32 bits. Beskytter mot replay siden den økes med 1 for hver melding. Består av to deler, Hyper Frame Number (HFN) og Radio Resource Control (RRC) sequence number (SQN). Initialisert ved oppkobling. 
+* Fresh. Random 32 bit verdi. Brukes for å forsikre at ikke samme melding sendes på nytt.
+* Direction. (Samme som konfidensialitet)
+* Message. Heltall mellom 1 og 20000. 
+
+Count-I, Fresh oh direction fornues for hver blokk.
+
+Beskriv f9 i UMTS
+-----------------
+
+Benytter KASUMI i en form for CBC-MAC-modus (Endringen er at alle mellomliggende blokker XOR-es sammen, før en endelig KASUMI-operasjon gjøres på den samlede blokken).
+
+Figure 6.6, s 164
+
+f9 benytter to 64 bit registre, A og B, som begge initialiseres til 0. Brukes også en 128 bit KM, som er lik 10101010 repetert 16 ganger.
+
+* PS = COUNT (32 bit) || FRESH (32 bit) || MESSAGE || DIRECTION (1 bit) || 1 || 0...0 (0-63 bit)
+* PS = PS0 || PS1 || ... || PSx
+
+![A](a-f9.png) 
+![B](b-f9.png)
+
+Hovedgrunnen til at ikke standard CBC ble valgt, var på grunn av den korte blokklengden i KASUMI. Har nå 128 bit intern tilstand. 
+
+Hvilke kryptografiske funksjoner er en del av autentiseringsprosedyren i UMTS?
+------------------------------------------------------------------------------
+
+* f0 — Random challange generating function, lager RAND
+* f1 — The network autentication function
+* f1* — The resynchronization message autentication function
+* f2 — The user authentication function
+* f3 — The Cipher Key (CK) derivation function
+* f4 — The Integrity Key (IK) derication function
+* f5 — The Anonymity Key (AK) derivation function
+* f5* — The AK derivation function for resynchronization
+
+f0-f5 er proprietære funksjoner som kun brukes til å gjensidig autentisering mellom USIM og AuC, for å finne nøkler for å beskytte bruker- og signaleringsdata, og for å skjule SQN for konfidensialitet. f1* brukes kun for å skaffe _data origin authentication_ for synkroniseringsfeil-informasjon sendt fra USIM. f5* brukes kun for å gholde brukeridentiten konfidensiell under resynkronisering.
+
+f0 ligger kun i AuC, de andre ligger i både AuC og USIM.
+
+Hvordan genereres kvintetten i AuC?
+-----------------------------------
+
+RAND genereres med f0. 
+
+Figur 8.1, s 203
+
+Hvordan skjer autentisering og utledelse av nøkkel i USIM?
+----------------------------------------------------------
+
+Mottar (RAND, AUTN).
+
+Figur 8.2, s 204
+
+Hvordan genereres resynkroniseringstegnet i USIM?
+-------------------------------------------------
+
+AMF* er default verdi i resynkronisering.
+
+Figur 8.3, s 204
+
+Hvordan gjøres resynkronisering i HLR/AuC?
+------------------------------------------
+
+Mottar (AUTS, RAND)
+
+Figur 8.4, s 205
+
+Hva er MILENAGE?
+----------------
+
+Rammeverk for algoritmer. Blokk cipher-kryptering med 128 bit input, 128 bit nøkkel og 128 bit output. I tillegg har det en 128 bit OP, slik at operator kan legge til en ekstra algoritme-konfigurasjon. 128 bits konstant ci har 1 i posisjon i-1, ellers 0. r = [64, 0, 32, 64, 96]
+
+Figur 8.5, s 219
+
+MILENAGE kunne lages enten ved å benytte et block cipher eller ved å bruke hash-funksjoner. Valgte blokk cipher. Grunner:
+
+* Effektivitet i smartkort. Må være effektiv implementerbar i 8 bits-prosessor, vanligvis er hash-funksjoner optimalisert for 32 bit.
+* DPA og andre sidekanals-angrep på smartkort er bedre forstått og analysert for block ciphers.
+* Block ciphers er laget med tanke på nøkkelinput, det er ikke hash-funksjoner.
+* Flere kjente block ciphers enn hash-funksjoner.
+
+Fokus i cryptanalysis-testene var konstruksjonen for f1-f5*.
+Cursory
+=======
+
+Bakgrunnsinformasjon.
+
+Hva er de seks prinsippene for sikkerhetstenkning?
+--------------------------------------------------
+
+1. Ikke snakk til noen du ikke kjenner. For a Wi-Fi LAN, it is not enough to verify the identity of the other party. A Wi-Fi LAN must also verify that every message really came from that party.
+2. Godta ingenting uten garanti. Means a guarantee of authenticity. Ingen endring. 
+3. Behandle alle som en fiende til det motsatte er bevist.
+4. Ikke stol på vennene dine for lenge. "Friends" in a Wi-Fi LAN can be identified because they possess tokens such as a secret key that can be verified. Such tokens, whether they are keys, certificates, or passwords, need to have a limited life. Renew tokens periodically.
+5. Bruk gjennomprøvde løsninger.
+6. Se etter sprekker i bakken du står på. The challenge for hackers, of course, is to look for the little cracks and crevices that result from hidden assumptions.
+
+Begreper
+--------
+
+* Threat model. The basis for designing and evaluating security. Identify all the threats against which we plan to defend.
+* Security protocol. Real security is provided by a set of processes and procedures that are carefully linked together.
+* Key Entropy. The number of possible key values determines the strength of the key.
+
+Tradisjonell sikkerhetsarkitektur
+---------------------------------
+
+The traditional approach for network security is to divide the network into two zones: trusted and untrusted. There is no need for network security protection within the trusted zone because there are no enemies present. By contrast, you regard the untrusted zone as full of enemies.
+
+![Conventional Security Architecture](http://github.com/kjbekkelund/ttm4137/raw/master/media/conventional-security-architecture.png)
+
+How does Wi-Fi LAN fit into this conventional security architecture?
+
+1. Put Wireless LAN in the Untrusted Zone. With the possible exception of national security headquarters, offices do not have perfect screening. You may decide, therefore, that Wi-Fi LANs are always operating in an untrusted zone. You can get around this by using VPN, but that might slow down communication, demand a high capacity VPN server, and limit the types of operation that can be performed.
+2. Make Wi-Fi LAN Trusted. Make the Wi-Fi LAN itself fundamentally impenetrable by enemies. You can make Wi-Fi LANs as trusted as wired LANs by making it very difficult to decode the wireless signals.
+
+Hvorfor er Wi-Fi sårbar mot angrep?
+-----------------------------------
+
+Bruker radiobølger. Enhver kan lytte. Dette krever en ny måte å tenke, siden det er enormt forskjellig fra før, der mediet i seg selv var lukket i mye større grad. 
+
+Generelt for trådløs kommunikasjon: Ikke-detekterbar passiv og lavrisiko aktive angrep. Muliggjør man-in-the-middle-angrep. Også mulig med angrep som jamming og elektromagnetisk "bombing". Mange klienter benytter en basestasjon/aksesspunkt. Mobilitet, roaming.
+
+Hva er hovedkategoriene for angrep?
+-----------------------------------
+
+1. Snooping. Aksessere privat informasjon. Kryptering kan brukes for å gjøre det vanskelig å få tak i informasjonen.
+2. Modifications. Modifisering av data, f.eks. destinasjonsfeltet (IP-address) i en melding eller innholdet i epost-er.
+3. Masquerading. Maskeres seg som en gyldig enhet. Ideell fremgangsmåte dersom angriperen ønsker å forbli umerket. Kan bruke dette til å for eksempel få tak i innloggingskredentialer. 
+4. Denial of Service. Forskjellig fra 1-3, hovedsakelig med tanke på at den prøver å blokkere alle, også seg selv, istedenfor å gi seg selv mer adgang, slik målet er i de andre typene angrep.
+
+Hvilke angrep er mulig uten nøkkel?
+-----------------------------------
+
+### Snooping
+
+Ved å snuse rundt kan man kun finne ut informasjon om hvordan, når, og fra hvilke enheter nettverket brukes. Begrenset bruk, men kan være verdifullt sammen med annen informasjon en angriper kan få tak i.
+
+En angriper kan blant annet finne ut:
+
+* Leverandør av aksesspunkt ved å benytte MAC-addressen. Modell kan muligens finnes ved å se på funksjonalitet eller proprietær informasjon i beacon.
+* Trafikkanalyse kan gi informasjon om hvordan nettverket brukes, f.eks. antall brukere, når nettverket bruker, osv.
+* Dersom WEP benyttes, kan man se om flere brukere benytter samme nøkkel.
+
+### Man-in-the-Middle
+
+Kan benyttes til å modifisere meldinger i transitt uten at det detekteres. Det er to måter å modifisere: Enten kan det gjøres on-the-fly eller man kan fange, modifisere, og gjenspille meldingen (store-and-forward).
+
+For å gjøre et store-and-forward-angrep i Wi-Fi må angriperen stoppe den intielle meldingen, slik at modifikasjoner kan gjøres på den før den videresendes til brukeren.
+
+(Figur av liste)
+
+En annen måte å gjøre dette, er ved å sette opp et falsk aksesspunkt. Det falske aksesspunktet identifiseret et ekte aksesspunkt. Når en enhet prøver å koble til det falske aksesspunktet, modifiseres meldingen blant annet med å substituere inn sin egen MAC, og videresendes så til det ekte aksesspunktet. Gjør det samme med data andre vei. Har ikke nøkkel, så har bare kryptert data.
+
+Hvilke angrep er mulig på nøklene?
+----------------------------------
+
+Mennesket er ofte det svakeste ledd i sikkerhet. For å unngå dette problemet, kan man bruke engangspassord. Eks: Bank-ID. Nøkkelen er kun aktiv i noen minutter, noe som gjør at det har begrenset verdi.
+
+Man kan "begrave" nøkkelen, slik man for eksempel gjør i SIM-kort. Nøkkelen gjøres utilgjengelig for utenomverden. Men det er fortsatt essensielt å endre passord fra tid til annen.
+
+Trådløshet introduserer helt nye problemer. Lett å få tilgang til datastrømmene, selv om de er krypterte. 
+
+Hva er infrastruktur-modus og ad-hoc-modus?
+-------------------------------------------
+
+Når IEEE 802.11-systemer arbeider gjennom et aksesspunkt, opererer de i infrastruktur-modus (ESS). Koordineringen av Wi-Fi LAN-et gjøres av aksesspunktet fra et bestemt punkt, og har ofte koblingen til Ethernett-nettverket.
+
+I ad-hoc-modus (IBSS) er det derimot ikke noe aksesspunkt, og hver trådløs-enhet kan sende direkte til hvilken som helst annen enhet.
+
+Forklar basisoperasjon i infrastruktur-modus
+--------------------------------------------
+
+* AP = Fixed Access Point
+* STA = (Station) Wireless Device
+
+AP og STA snakker med hverandre ved å bruke trådløse meldinger. AP er koblet til (wired) nettverket STA ønsker å aksessere.
+
+AP annonserer periodiske sin tilstedeværelse i korte meldinger kalt _beacons_. Gjør at STA kan avdekke identiteten til AP. En STA søker etter AP. Flere forskjelllige frekvenser (kanaler) kan bruker, så STA-en må lytte på hver av disse. Dette kalles skanning. 
+
+Når en STA er klar for å koble til en AP, sender den en _authenticate request message_ til AP-en. AP responderer på denne ved å sende en aksept. Nå har STA tillatelse til å koble til AP, men en assosiasjon settes opp før den kan sende og motta data fra nettverket. STA sender en _association request_ og AP svarer med en _association response_.
+
+Roaming. STA sender _disassociation message_ til gammel AP, og _reassociation message_ til ny. Sistnevnte inneholder informasjon som muliggjør smoothere handover.
+
+Beskriv kort arkitekturen i IEEE 802.11
+---------------------------------------
+
+To laveste nivå av referansemodell. Tilsvarende Physical og Data Link i OSI.
+
+Hvilke type meldinger finnes i IEEE 802.11?
+-------------------------------------------
+
+1. Control. Korte meldinger for start og stopp sending av informasjon, samt om det har vært en kommunikasjonsfeil.
+2. Management. Brukes av AP og STA for å forhandle og kontrollere forhold. 
+   * Beacons. AP annonserer periodiske sin tilstedeværelse. Inneholder informasjon som nettverksnavn og funksjoner i AP.
+   * Probing. En STA kan sende en _probe request message_. Dersom AP mottar, sendes umiddelbart en respons. Slik kan STA finne AP hurtig uten å søke gjennom alle kanaler og vente på beacon.
+3. Data. Sendes vanligvis mellom STA og AP, også når mottaker er en annen STA. AP videresender. IEEE 802.11 datarammer som går til eller fra AP har tre adresser; kilde, mål og mellomliggende (dvs AP den går gjennom).
+
+Forklar MAC (header) i IEEE 802.11
+----------------------------------
+
+MAC-headeren er en del av det generelle formatet på rammer i IEEE 802.11.
+
+![Generelt format på rammer i IEEE 802.11](http://github.com/kjbekkelund/ttm4137/raw/master/media/basic-frame-format-802-11.png)
+
+Tre typer basert på om det er snakk om en kontrollramme, styringsramme eller dataramme. Viktigste del: adresser. 6 byte per adresse. Hver enhet har en unik adresse spesifisert under produksjon. Destinasjon kan være unikast eller multikast.
+
+To til fire adresser per header:
+
+* Transmitter address (TA)
+* Receiver address (RA)
+* Source address (SA)
+* Destination address (DA)
+
+(AP til AP-kommunikasjon ikke fullt spesifisert i standarden, og det er få implementasjoner.)
+
+Enkelt for andre å late som de er andre ved å benytte deres MAC-adresse.
+
+Styringsrammer, men ikke kontroll- og datarammer, er viktige med tanke på sikkerhet. Består av to deler; et sett med bestemte felt, og elementer. Et element er en (self-contained) pakke med informasjon. Gjør at standarden enklere kan oppdateres. Første byte identifiserer type, det andre lengde. 
