@@ -792,10 +792,10 @@ Gjør det mulig for USIM å sjekke om autentiseringsutfordringen er mottatt før
 
 ### Synkronisering av SQN
 
-Dersom SQN verdien ikke er synkronisert mellom USIM og AuC, er det mulig at autentisering vil feile. Dersom dette skjer, kan resynkronisering gjennomføres. Dette gjøres ved å sende en AUTS, som inneholder:
+Dersom SQN verdien ikke er synkronisert mellom USIM og AuC, er det mulig at autentisering vil feile. Dersom dette skjer, kan resynkronisering gjennomføres. Dette gjøres ved å sende en AUTS (112 bit), som inneholder:
 
 * SQN fra USIM sikret ved å benytte AK
-* MAC-S ved å bruke f1* på SQN, K, RAND og AMF. f1* er forskjellig fra f1. 
+* MAC-S ved å bruke f1\* på SQN, K, RAND og AMF. f1\* er forskjellig fra f1. 
 
 Når AuC mottar AUTS, regner den først ut SQN-verdien til USIM. Basert på denne sjekkes det om neste autentiseringsvektor vil være akseptabel for USIM. 
 
@@ -895,88 +895,17 @@ MAP = Mobile Application Part. SS7-protokoll som benyttes i GSM og UMTS. Brukes 
 
 MAPsec er introdusert for å beskytte eksisterende globale nettverk med MAP-kapable nettverkselement (NE). Beskyttelse mot aktive angrep vil være vanskelig fram til det er utbredt støtte for MAPsec. 
 
-En plaintext MAP-melding krypteres og puttes i en annen MAP-melding sammen med en MAC av meldingen. MAPsec benytter sammen Sikkerhetsassosiasjon-notasjon som IPsec. Disse inneholder kryptografiske nøkler og annen relevant sikkerhetsinformasjon (eks krypteringsalgoritme, integritetsalgoritme, protection profile ID, protection profile revision ID, soft expiry time, hard expiry time). Hvordan disse overføres mellom operatører er ikke spesifisert i 3GPP Release 4. Etter å ha nått soft expiry time kan ikke sender benytte SA, og etter hard expiry time skal den ikke benyttes i det hele tatt.
+En plaintext MAP-melding krypteres og puttes i en annen MAP-melding sammen med en MAC av meldingen. MAPsec benytter samme Sikkerhetsassosiasjon-notasjon som IPsec. Disse inneholder kryptografiske nøkler og annen relevant sikkerhetsinformasjon (eks krypteringsalgoritme, integritetsalgoritme, protection profile ID, protection profile revision ID, soft expiry time, hard expiry time). Hvordan disse overføres mellom operatører er ikke spesifisert i 3GPP Release 4. Etter å ha nådd soft expiry time kan ikke sender benytte SA, og etter hard expiry time skal den ikke benyttes i det hele tatt.
 
 Basiselementet i automatisk nøkkelhåndtering i MAPsec er Key Administration Center (KAC). Disse blir enige om SA-er ved å benytte Internet Key Exchange (IKE). KAC-er distribuerer SA-er til NE. Det er nettverk, ikke individuelle NE-er, som adresseres av MAP-meldinger. 
+
+![MAPsec](http://github.com/kjbekkelund/ttm4137/raw/master/media/mapsec.png)
 
 Tre beskyttelsesmoduser: Ingen sikkerhet, kun integritetsbeskyttelse, og kryptering og integritetsbeskyttelse. Sistnevnte har følgende struktur: sikkerhetsheader || f6(plaintext) || f7(sikkerhetsheader || f6(plaintext)), der f6 er AES i counter-mode og f7 er AES i CBC-MAC-mode. I alle tre tilfeller består meldingen av en sikkerhetsheader og en beskyttet payload. Sikkerhetsheader består av SPI (Security Parameter Index) og PLMN (Public Land Mobile Network), som sammen viser til en unik MAPsec SA. I tillegg inneholder den _Original Component ID_, som refererer til typen til den originale MAP-meldingen; TVP (Time Variant Parameter) som gir beskyttelse mot replay-angrep; NE-ID som identifiserer nettverkselementet som sender meldingen; og Prop som er et proprietært felt for lokal bruk.
 
 Av ytelsesgrunner er det er kun noen MAP-operasjoner som beskyttes. Forskjellige komponenter har forskjellige beskyttelsesmoduser. Dette har ført spesifikasjon av _protection profile_. Disse spesifiserer grad av beskyttelse og beskyttelsesmodus for hver MAP-komponent. 
 
 Automatisk nøkkelhåndtering er inkludert i Release 6. En KAC brukes for å forhandle SA-er på vegne av NE-er. KAC har også en SA-database og en Security Policy-database. SA-er er gyldige på en PLMN-til-PLMN-basis. SA-er og policy-er distribueres av KAC over Ze-interfacet. Når NE skal kontake annen NE, begynner den med å sjekke lokal database. Finner den ikke noe der, tar den kontakt med KAC. Dersom det ikke eksiterer der, begynner SA-forhandling med annen PLMN. 
-
-Sikkerhet i IMS
----------------
-
-IMS er et komplett applikasjonslag-system bygd på toppen av UMTS PS-domenet. Støtter idag UTRAN og GERAN, men kan støtte andre, som for eksempel WLAN, i framtiden. Essensielt i IMS er SIP (Session Initiation Protocol), som håndterer IP-sesjoner. De sentrale elementene i IMS er SIP-servere og SIP-proxyer (CSCF).
-
-Når en UA ønsker tilgang til IMS, lager den først en PDP (Packet Data Protocol)-kontekst med PS-domenet. I denne prosessen brukes gjensidig autentisering, integritetsbeskyttelse og kryptering fra UMTS. UA og Home IMS autentiserer hverandre ved å bruke en permanent, delt masternøkkel. Setter opp temporære nøkler for den videre beskyttelsen av SIP-meldinger. SIP-trafikk mellom besøkt IMS og hjemme-IMS er beskyttet av nettverks-sikkerhetsmekanismer. UA og P-CSCF setter så opp parametre for sikkerhetsmekasismene brukt heretter, før integritetsbeskyttelse mellom dem er satt opp, basert på de temporære nøklene.
-
-Avhenger av tre hovedkomponenter:
-
-* Permanent sikkerhetskontekst mellom UE og HSS. Dette gjøres ved å benytte en IMS Sucsbriber Identity Module (ISIM). Begge inneholder identitet og tilsvarende masternøkkel.
-* Temporær sikkerhetskontekst mellom UA og P-CSCF. Benytter IPsec SA-er. 
-* All trafikk på kontrollplanet mellom nettverksnoder er beskyttet.
-
-### Registrering
-
-To SIP-prosedyrer spiller en sentral rolle i IMS-sikkerhet: REGISTER og INVITE. En IMS Private Indentity (IMPI) er lagret i ISIM og i HSS, i tillegg til en 128 bits masternøkkel og en IMS Public Identity (IMPU). Kan være flere IMPU per IMPI. IMPI er en Network Access Identifier (NAI), mens IMPU er en SIP-URI. 
-
-Før en bruker kan benytte IMS-tjenester må hun aktive registrere seg. Dette gjøres ved å sende en REGISTER til en P-CSCF. REGISTER inneholder både IMPI og minst en IMPU. Når registrering er satt opp deler UE og P-CSCF IPsec ESP SA-er som kan benyttes til å beskytte den videre kommunikasjonen.
-
-![SIP-registrering](http://github.com/kjbekkelund/ttm4137/raw/master/media/sip-register.png)
-
-### Bruken av HTTP Digest AKA
-
-Gjensidig autentisering og nøkkel-enighet (3GPP AKA) gjøres på toppen av HTTP Digest, som er basert på delt passord. 3GPP AKA er ikke basert på delt passord mellom UE og P-CSCF, men permanent delt hemmelighet mellom UE og HSS. Bruker RAND og AUTN som nonce, og RES kalkulert fra RAND som passord. AKA indikeres i algoritme-valget. 
-
-![HTTP Digest](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-http-digest.png)
-
-### Oppsett av sikkerhetsmodus
-
-Når aktiveres mekanismer? Når starter beskyttelsen i hver retning? Hvilke parametre er aktivert?
-
-Et åpenbart angrep er å forhindre at mekasismene aktiveres i det hele tatt, for eksempel ved et man-in-the-middle-angrep.
-
-Security agreement message flow:
-
-![Security agreement message flow](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-security-agreement-flow.png)
-
-Tre SIP-headere definert med tanke på sikkerhet. Security-Client, Security-Server og Security-Verify. Fem sikkerhetsmekanismer som kan forhandles: TLS, HTTP Digest, IPsec med IKE, IPsec uten IKE, IPsec ESP for å beskytte første IMS-hopp.
-
-### Integritetsbeskyttelse
-
-Gjøres med IPsec ESP. Identiteter i SIP-laget (IMPI, ...) må knyttes til IP-adresser. Dette løses i P-CSCF, som sjekker om IP-adressen brukt for integritetsbeskyttelse i tillatt for gitt IMPI. 
-
-Det er uungåelig at noen SIP-meldinger må sendes uten integritetsbeskyttelse. I IP-laget er det forskjellige porter som differensierer unbeskyttede og beskyttede meldinger. IPsec kommuniserer til SIP-lagert informasjon om IP-adresse og port for hver pakke, slik at det kan verifiseres at pakker sendes til rett port. IPsec passer på at riktig SA benyttes, mens SIP passer på at IP-adresse og port matcher SIP-meldingen.
-
-To par med enveis ESP SA-er benyttes mellom UE og P-CSCF (to fra og to til). 
-
-Parametre: 
-
-* Integritetsbeskyttelse (HMAC-SHA5, HMAC-SHA1) forhandlet mellom UE og P-CSCF
-* SPI valgt av UE for SA-er som går til UE, og av P-CSCF for SA-er som går til P-CSCF.
-* SA-varighet, konstant 2^32-1 i IP-laget, livstid kontrolleres i SIP-laget
-* Modus, alltid transport
-* Nøkkellengde, 128 bit for MD5, 160 for SHA1
-
-IP-adresse og SPI identifiserer unikt SA i IP-laget. Alle SA er lagret i SA-database. Trenger i tillegg en policy-database, som er brukt til å bestemme om beskyttelse trengs for hver innkommende og utgående melding (bindes til IP-adresse, port eller transport-protokoll).
-
-P-CSCF velger to beskyttede porter (port_pc og port_ps), som sendes sikret til IE. Kun beskyttede meldinger kan mottas på disse portene. UE velger så to lokale beskyttede porter (port_uc og port_us). 
-
-P-CSCF opprettholder en database der hver SA kan identifiseres fra UEs IP-adresse og beskyttet port. Inneholder også IMPI og IMPU knyttet til hver SA, samt levetiden til SA. For hver innkommende melding sjekker P-CSCF at den er korrekt. UE inneholder også en database. For hver SA inneholder den beskyttede porter og levetid.
-
-Dersom UE starter en reregistrering samtidig som den allerede er beskyttet av en SA, kan det en periode hver to sett med SA-er. UE sletter det gamle settet når den mottar melding beskyttet av ny SA. 
-
-### Feilhåndtering
-
-Ingen uniform måte å håndtere feil.
-
-* Meldinger med inkorrekt integritet skal forkastes uten videre notifikasjon. 
-* Dersom autentisering feiler (RES != XRES), vil registreringen av IMPI kanselleres og det sendes en respons til UE.
-* Ved feil i nettverksautentisering der MAC i AUTN ikke er korrekt, vil IMPI, som over, kanselleres fra HSS. Dersom grunnen er at SQN ikke godtas, vil resynkronisering starte. 
-* Dersom forslaget fra UE i oppsett av sikkerhetsmodus ikke godtas i P-CSCF, vil feilmelding sendes til UE. Dersom forslaget fra P-CSCF til UE ikke godtas, termineres registreringsprosedyren.
-* Dersom _server list_ returnert til UE ikke er identitiske med sendt, termineres registreringsprosedyren.
 
 Hva er kravene til konfidensialitetsalgoritmen i UMTS?
 ------------------------------------------------------
@@ -1007,8 +936,6 @@ Beskriv f8 i UMTS
 -----------------
 
 Benytter KASUMI i en blanding av counter- og OFB-modus, men en _pre-whitening_ av feedback-data.
-
-![f8](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-f8.png)
 
 ![f8](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-f8-2.png)
 
@@ -1121,7 +1048,7 @@ Hva er MILENAGE?
 
 Rammeverk for algoritmer. Blokk cipher-kryptering med 128 bit input, 128 bit nøkkel og 128 bit output. I tillegg har det en 128 bit OP, slik at operator kan legge til en ekstra algoritme-konfigurasjon. 128 bits konstant ci har 1 i posisjon i-1, ellers 0. r = [64, 0, 32, 64, 96]
 
-![MILENAGE](milenage.png)
+![MILENAGE](http://github.com/kjbekkelund/ttm4137/raw/master/media/milenage.png)
 
 MILENAGE kunne lages enten ved å benytte et block cipher eller ved å bruke hash-funksjoner. Valgte blokk cipher. Grunner:
 
@@ -1131,6 +1058,79 @@ MILENAGE kunne lages enten ved å benytte et block cipher eller ved å bruke has
 * Flere kjente block ciphers enn hash-funksjoner.
 
 Fokus i cryptanalysis-testene var konstruksjonen for f1-f5*.
+
+Sikkerhet i IMS
+---------------
+
+IMS er et komplett applikasjonslag-system bygd på toppen av UMTS PS-domenet. Støtter idag UTRAN og GERAN, men kan støtte andre, som for eksempel WLAN, i framtiden. Essensielt i IMS er SIP (Session Initiation Protocol), som håndterer IP-sesjoner. De sentrale elementene i IMS er SIP-servere og SIP-proxyer (CSCF).
+
+Når en UA ønsker tilgang til IMS, lager den først en PDP (Packet Data Protocol)-kontekst med PS-domenet. I denne prosessen brukes gjensidig autentisering, integritetsbeskyttelse og kryptering fra UMTS. UA og Home IMS autentiserer hverandre ved å bruke en permanent, delt masternøkkel. Setter opp temporære nøkler for den videre beskyttelsen av SIP-meldinger. SIP-trafikk mellom besøkt IMS og hjemme-IMS er beskyttet av nettverks-sikkerhetsmekanismer. UA og P-CSCF setter så opp parametre for sikkerhetsmekasismene brukt heretter, før integritetsbeskyttelse mellom dem er satt opp, basert på de temporære nøklene.
+
+Avhenger av tre hovedkomponenter:
+
+* Permanent sikkerhetskontekst mellom UE og HSS. Dette gjøres ved å benytte en IMS Sucsbriber Identity Module (ISIM). Begge inneholder identitet og tilsvarende masternøkkel.
+* Temporær sikkerhetskontekst mellom UA og P-CSCF. Benytter IPsec SA-er. 
+* All trafikk på kontrollplanet mellom nettverksnoder er beskyttet.
+
+### Registrering
+
+To SIP-prosedyrer spiller en sentral rolle i IMS-sikkerhet: REGISTER og INVITE. En IMS Private Indentity (IMPI) er lagret i ISIM og i HSS, i tillegg til en 128 bits masternøkkel og en IMS Public Identity (IMPU). Kan være flere IMPU per IMPI. IMPI er en Network Access Identifier (NAI), mens IMPU er en SIP-URI. 
+
+Før en bruker kan benytte IMS-tjenester må hun aktive registrere seg. Dette gjøres ved å sende en REGISTER til en P-CSCF. REGISTER inneholder både IMPI og minst en IMPU. Når registrering er satt opp deler UE og P-CSCF IPsec ESP SA-er som kan benyttes til å beskytte den videre kommunikasjonen.
+
+![SIP-registrering](http://github.com/kjbekkelund/ttm4137/raw/master/media/sip-register.png)
+
+### Bruken av HTTP Digest AKA
+
+Gjensidig autentisering og nøkkel-enighet (3GPP AKA) gjøres på toppen av HTTP Digest, som er basert på delt passord. 3GPP AKA er ikke basert på delt passord mellom UE og P-CSCF, men permanent delt hemmelighet mellom UE og HSS. Bruker RAND og AUTN som nonce, og RES kalkulert fra RAND som passord. AKA indikeres i algoritme-valget. 
+
+![HTTP Digest](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-http-digest.png)
+
+### Oppsett av sikkerhetsmodus
+
+Når aktiveres mekanismer? Når starter beskyttelsen i hver retning? Hvilke parametre er aktivert?
+
+Et åpenbart angrep er å forhindre at mekasismene aktiveres i det hele tatt, for eksempel ved et man-in-the-middle-angrep.
+
+Security agreement message flow:
+
+![Security agreement message flow](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-security-agreement-flow.png)
+
+Tre SIP-headere definert med tanke på sikkerhet. Security-Client, Security-Server og Security-Verify. Fem sikkerhetsmekanismer som kan forhandles: TLS, HTTP Digest, IPsec med IKE, IPsec uten IKE, IPsec ESP for å beskytte første IMS-hopp.
+
+### Integritetsbeskyttelse
+
+Gjøres med IPsec ESP. Identiteter i SIP-laget (IMPI, ...) må knyttes til IP-adresser. Dette løses i P-CSCF, som sjekker om IP-adressen brukt for integritetsbeskyttelse i tillatt for gitt IMPI. 
+
+Det er uungåelig at noen SIP-meldinger må sendes uten integritetsbeskyttelse. I IP-laget er det forskjellige porter som differensierer unbeskyttede og beskyttede meldinger. IPsec kommuniserer til SIP-lagert informasjon om IP-adresse og port for hver pakke, slik at det kan verifiseres at pakker sendes til rett port. IPsec passer på at riktig SA benyttes, mens SIP passer på at IP-adresse og port matcher SIP-meldingen.
+
+To par med enveis ESP SA-er benyttes mellom UE og P-CSCF (to fra og to til). 
+
+Parametre: 
+
+* Integritetsbeskyttelse (HMAC-SHA5, HMAC-SHA1) forhandlet mellom UE og P-CSCF
+* SPI valgt av UE for SA-er som går til UE, og av P-CSCF for SA-er som går til P-CSCF.
+* SA-varighet, konstant 2^32-1 i IP-laget, livstid kontrolleres i SIP-laget
+* Modus, alltid transport
+* Nøkkellengde, 128 bit for MD5, 160 for SHA1
+
+IP-adresse og SPI identifiserer unikt SA i IP-laget. Alle SA er lagret i SA-database. Trenger i tillegg en policy-database, som er brukt til å bestemme om beskyttelse trengs for hver innkommende og utgående melding (bindes til IP-adresse, port eller transport-protokoll).
+
+P-CSCF velger to beskyttede porter (port_pc og port_ps), som sendes sikret til IE. Kun beskyttede meldinger kan mottas på disse portene. UE velger så to lokale beskyttede porter (port_uc og port_us). 
+
+P-CSCF opprettholder en database der hver SA kan identifiseres fra UEs IP-adresse og beskyttet port. Inneholder også IMPI og IMPU knyttet til hver SA, samt levetiden til SA. For hver innkommende melding sjekker P-CSCF at den er korrekt. UE inneholder også en database. For hver SA inneholder den beskyttede porter og levetid.
+
+Dersom UE starter en reregistrering samtidig som den allerede er beskyttet av en SA, kan det en periode hver to sett med SA-er. UE sletter det gamle settet når den mottar melding beskyttet av ny SA. 
+
+### Feilhåndtering
+
+Ingen uniform måte å håndtere feil.
+
+* Meldinger med inkorrekt integritet skal forkastes uten videre notifikasjon. 
+* Dersom autentisering feiler (RES != XRES), vil registreringen av IMPI kanselleres og det sendes en respons til UE.
+* Ved feil i nettverksautentisering der MAC i AUTN ikke er korrekt, vil IMPI, som over, kanselleres fra HSS. Dersom grunnen er at SQN ikke godtas, vil resynkronisering starte. 
+* Dersom forslaget fra UE i oppsett av sikkerhetsmodus ikke godtas i P-CSCF, vil feilmelding sendes til UE. Dersom forslaget fra P-CSCF til UE ikke godtas, termineres registreringsprosedyren.
+* Dersom _server list_ returnert til UE ikke er identitiske med sendt, termineres registreringsprosedyren.
 
 Cursory
 =======
