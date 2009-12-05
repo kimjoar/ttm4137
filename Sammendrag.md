@@ -649,11 +649,15 @@ Tre deler:
 
 1. Få tak i MS sin IMSI. Kan gjøres ved å initiere autentiseringsprosedyre før angrepet starter. Dette gjøres ved å imitere en GSM basestasjon. Kobler av etter mottatt IMSI.
 2. Angriper handler på vegne av MS for å få en gylding autentiseringstoken (AUTN) fra et ekte nettverk. Ingen av disse meldingene er sikret. 
-   
-   ![Obtain valid AUTN](http://github.com/kjbekkelund/ttm4137/raw/master/media/obtain-valid-autn.png)
 3. Imiterer en GSM basestasjon som MS kobler på. Velger i steg 6 å bruke "No encryption". 
-   
-   ![Impersonate valid GSM base station](http://github.com/kjbekkelund/ttm4137/raw/master/media/impersonate-valid-gsm.png)
+
+Hente AUTN:
+
+![Obtain valid AUTN](http://github.com/kjbekkelund/ttm4137/raw/master/media/obtain-valid-autn.png)
+
+Være basestasjon:
+
+![Impersonate valid GSM base station](http://github.com/kjbekkelund/ttm4137/raw/master/media/impersonate-valid-gsm.png)
 
 Dette angrepet gjør det ikke mulig for angriperen å skape en kobling mellom MS og en ekte basestasjon, og for å få en "vanlig" kobling må angriperen lage en kobling til et ekte nettverk for å videresende trafikk.
 
@@ -761,7 +765,7 @@ UEs sjekk av SN gjøres ved hjelp av AUTN. Master-nøkkel er 128 bit, hemmelig, 
 * 128 bits IK
 * 48 bits AK = Anonymity Key. Brukt til å skjule SQN.
 * 48 bits SQN
-* AUTN = SQN (xor) AK || AMF || MAC
+* AUTN = SQN ⊕ AK || AMF || MAC
 
 ![Generering av autentiseringsvektor i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-autentication-vector.png)
 
@@ -915,8 +919,8 @@ Benytter funksjonen f8, som må være fullt standardisert synkront stream-cipher
 Tre moduser:
 
 * RLC-transparent. Ny nøkkelstrøm på 10ms trengs for hver fysiske ramme. 
-* Unacknowledged RLC. Ny nøkkelstrøm kreves for hver PDU.
-* Acknowledged RLC. Ny nøkkelstrøm for hver PDU.
+* Unacknowledged RLC. Ny nøkkelstrøm kreves for hver PDU. (RLC data blocks that have not been correctly decoded are not retransmitted by the sending entity.)
+* Acknowledged RLC. Ny nøkkelstrøm for hver PDU. (The RLC ensures the selective retransmission of RLC data blocks that have not been correctly decoded by the receiver.)
 
 (RLC = Radio Link Control)
 
@@ -1010,6 +1014,8 @@ Hvilke kryptografiske funksjoner er en del av autentiseringsprosedyren i UMTS?
 * f4 — The Integrity Key (IK) derication function
 * f5 — The Anonymity Key (AK) derivation function
 * f5* — The AK derivation function for resynchronization
+* f8 — Confidentiality
+* f9 — Integrity
 
 f0-f5 er proprietære funksjoner som kun brukes til å gjensidig autentisering mellom USIM og AuC, for å finne nøkler for å beskytte bruker- og signaleringsdata, og for å skjule SQN for konfidensialitet. f1* brukes kun for å skaffe _data origin authentication_ for synkroniseringsfeil-informasjon sendt fra USIM. f5* brukes kun for å gholde brukeridentiten konfidensiell under resynkronisering.
 
@@ -1046,7 +1052,7 @@ Mottar (AUTS, RAND)
 Hva er MILENAGE?
 ----------------
 
-Rammeverk for algoritmer. Blokk cipher-kryptering med 128 bit input, 128 bit nøkkel og 128 bit output. I tillegg har det en 128 bit OP, slik at operator kan legge til en ekstra algoritme-konfigurasjon. 128 bits konstant ci har 1 i posisjon i-1, ellers 0. r = [64, 0, 32, 64, 96]
+Rammeverk for algoritmer. Blokk cipher-kryptering med 128 bit input, 128 bit nøkkel og 128 bit output. I tillegg har det en 128 bit OP, slik at operator kan legge til en ekstra algoritme-konfigurasjon. 128 bits konstant ci har (default) verdier [0, 1, 2, 4, 8], ellers 0. r = [64, 0, 32, 64, 96]
 
 ![MILENAGE](http://github.com/kjbekkelund/ttm4137/raw/master/media/milenage.png)
 
