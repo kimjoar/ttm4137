@@ -21,7 +21,7 @@ Og med delt nøkkel starter problemet. Greit for et lite hjemmenettverk, men hva
 * Autentiseringsfase. Bevise sin identitet til hverandre. Problem: ingen hemmelig token, altså ingen måte å vite at etterfølgende meldinger kommer fra samme enhet. Meningsløst. Med delt nøkkel er målet at mobil enhet skal vise at den har nøkkelen. AP sender plaintext, får tilbake ciphertext. Snilt for hackere.
 * Krypteringsfase. Benytter RC4. Enkel å implementere. Rask. Initialisering og kryptering skjer på hver pakke. 24 bit til initialiseringsvektor (IV). IV endres for hver pakke, og sendes sammen med pakken. Gjør at samme plaintext gir forskjellige ciphertext. Nøkkel til RC4 er sammensatt av hemmelig nøkkel og IV. Problemet er at IV aldri bør brukes mer enn én gang per nøkkel. I WEP er det 24 bit, dvs ca 17 mill IV-verdier. Mange systemer starter med samme IV etter oppstart, og benytter et pseudorandom bytte.
 
-![WEP Block Diagram](http://github.com/kjbekkelund/ttm4137/raw/master/media/wep-block-diagram.png)
+![WEP Block Diagram](https://github.com/kjbekkelund/ttm4137/raw/master/media/wep-block-diagram.png)
 
 ### Svakheter
 
@@ -56,7 +56,7 @@ Først ankommer en pakke IEEE 802.11 MAC tjenestelaget. Denne kalles MSDU (MAC s
 * _Integrity check value_ (ICV) gjør at pakken ikke skal kunne endres under transport.
 * Nøkkelnummer og IV sendes ukryptert, slik at mottakeren vet hvordan meldingen skal dekrypteres.
 
-![WEP message, nesten klar](http://github.com/kjbekkelund/ttm4137/raw/master/media/wep-message.png)
+![WEP message, nesten klar](https://github.com/kjbekkelund/ttm4137/raw/master/media/wep-message.png)
 
 I tillegg til dette
 
@@ -108,7 +108,7 @@ Tre svakheter i måten WEP benytter RC4:
 
 * IV Reuse. Ved å ha lik IV i flere pakker har samme problem som dersom man har null salt i det hele tatt. RC4 vil dermed starte i samme tilstand.
   
-  ![IV Reuse Problem](http://github.com/kjbekkelund/ttm4137/raw/master/media/iv-reuse-problem.png)
+  ![IV Reuse Problem](https://github.com/kjbekkelund/ttm4137/raw/master/media/iv-reuse-problem.png)
   
   Som vi ser kan angriperen benytte det faktum at IV er lik i begge tilfeller til å finne plaintext som er XOR-et med plaintext. Det gir ikke mye i seg selv, men kan benyttes sammen med det faktum at IP-adressen i mange nettverk er rimelig spesifisert, osv. Jo mer data man vet om pakkene, jo mer plaintext kan man finne.
 * RC4 Weak Keys. For noen nøkler vil for mange bits i de første bytes-ene i nøkkelstrømmen (pseudorandom bytes) være bestemt av noen få bit i nøkkelen selv. Altså: noen bit i nøkkelen har større effekt enn andre, mens andre har null effekt. Dette er kun i begynnelsen, fram til RC4 "kommer igang". Kan løse dette ved å forkaste de første 256 bytes.
@@ -151,7 +151,7 @@ Siden det ville ta lang tid å innføre en ny standard etter man innså at WEP i
 Sammenligning av WEP, TKIP og RSN
 ---------------------------------
 
-![Sammenligning av WEP, TKIP og RSN](http://github.com/kjbekkelund/ttm4137/raw/master/media/comparison-wep-tkip-rsn.png)
+![Sammenligning av WEP, TKIP og RSN](https://github.com/kjbekkelund/ttm4137/raw/master/media/comparison-wep-tkip-rsn.png)
 
 Hva er forskjellen på TSN og RSN?
 ---------------------------------
@@ -183,7 +183,7 @@ Wireless LAN er alltid i AP. Access Control er vanligvis i AP. Authentication er
 
 IEEE802.11 dekker kun Wireless LAN. Access Control benytter 802.11X. IEEE 802.11i spesifiserer ingen obligarisk autentiseringsmetode, men RSN ble designet slik at man selv kan bestemme ønsket metode. 
 
-![Main Standards in an RSN Solution Based on TLS](http://github.com/kjbekkelund/ttm4137/raw/master/media/main-standards-rsn.png)
+![Main Standards in an RSN Solution Based on TLS](https://github.com/kjbekkelund/ttm4137/raw/master/media/main-standards-rsn.png)
 
 Hvorfor er aksesskontroll viktig?
 ---------------------------------
@@ -211,7 +211,7 @@ I boka fokuserer de på tre protokoller for implementering av adgangskontoll:
 Hva er IEEE 802.1X?
 -------------------
 
-![Oversikt over 802.1X](http://github.com/kjbekkelund/ttm4137/raw/master/media/802-1X-overview.png)
+![Oversikt over 802.1X](https://github.com/kjbekkelund/ttm4137/raw/master/media/802-1X-overview.png)
 
 Grunnlaget for WPA og RSN.
 
@@ -223,7 +223,7 @@ I trådløse nett er det ikke nok med å bli autentisering en gang, men man må 
 
 For de fleste Wi-Fi-LAN er den logiske plassen å plassere IEEE 802.1X i AP. I ad-hoc-modus er hver enhet både Supplicant og Authenticator.
 
-![802.1x lag](http://github.com/kjbekkelund/ttm4137/raw/master/media/802-1x-lag.png)
+![802.1x lag](https://github.com/kjbekkelund/ttm4137/raw/master/media/802-1x-lag.png)
 
 Hva er EAP?
 -----------
@@ -243,7 +243,7 @@ I 802.1X videresendes disse meldingene til og fra autentiseringsserveren, slik a
 
 Alle EAP-meldinger følger samme format.
 
-![EAP meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/media/eap-message-format.png)
+![EAP meldingsformat](https://github.com/kjbekkelund/ttm4137/raw/master/media/eap-message-format.png)
 
 * Code. 1 byte. Request = 1, Response = 2, Success = 3, Failure = 4.
 * Identifier. 2 bytes. Inkrementeres for hver melding sent. ResponseID settes til RequestID.
@@ -259,7 +259,7 @@ Request- og response-meldinger deles videre opp etter EAP Type-feltet. Første 6
 
 Serieautentisering er mulig. Kan gjøre så mange autentiseringer i sekvens som man ønsker.
 
-![EAP-Request/Response-melding](http://github.com/kjbekkelund/ttm4137/raw/master/media/eap-request-response.png)
+![EAP-Request/Response-melding](https://github.com/kjbekkelund/ttm4137/raw/master/media/eap-request-response.png)
 
 Hva er EAPOL?
 -------------
@@ -274,7 +274,7 @@ Fem typer meldinger:
 * EAPOL-Logoff. Indikerer at Supplicant ønsker å koble fra nettverket.
 * EAPOL-Encapsulated-ASF-Alert. _Benyttes ikke i WPA eller RSN_.
 
-![EAP meldingsflyt](http://github.com/kjbekkelund/ttm4137/raw/master/media/EAP-message-flow.png)
+![EAP meldingsflyt](https://github.com/kjbekkelund/ttm4137/raw/master/media/EAP-message-flow.png)
 
 Hva er RADIUS?
 --------------
@@ -290,7 +290,7 @@ Fire meldingstyper:
 
 Alle RADIUS-meldinger har samme basisformat.
 
-![RADIUS-meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/media/radius-message-format.png)
+![RADIUS-meldingsformat](https://github.com/kjbekkelund/ttm4137/raw/master/media/radius-message-format.png)
 
 * Code. Access-Request = 1, Access-Accept = 2, Access-Reject = 3, Access-Challange = 11.
 * Identifier. Vilkårlig tall brukt for å matche forespørsel og svar.
@@ -310,7 +310,7 @@ Utvidet til å støtte EAP-meldinger videresendt av AP. AP blir det mellomperson
 
 EAP-meldinger sendes til autentiseringsserveren i Access-Request-meldinger, og returneres i Access-Challange-meldinger. Selge EAP-meldinger sendes i (en eller flere) attributter med type = 79. 
 
-![EAP over RADIUS](http://github.com/kjbekkelund/ttm4137/raw/master/media/eap-radius.png)
+![EAP over RADIUS](https://github.com/kjbekkelund/ttm4137/raw/master/media/eap-radius.png)
 
 Hvordan henger RSN, WPA, IEEE 802.1X, EAP og RADIUS sammen?
 -----------------------------------------------------------
@@ -353,11 +353,11 @@ TLS handshake oppnår tre ting: Autentisert serveren (og optionally klienten), g
 
 Format på EAP-TLS-melding er litt forskjellig fra standard EAP-melding.
 
-![EAP-TLS-meldingsformat](http://github.com/kjbekkelund/ttm4137/raw/master/media/eap-tls-message.png)
+![EAP-TLS-meldingsformat](https://github.com/kjbekkelund/ttm4137/raw/master/media/eap-tls-message.png)
 
 Først _length_ spesifiserer antall byte i meldingen. Den andre er lengden på TLS-meldingen, siden den kan strekke over flere EAP-meldinger. Flags: Length included, More fragments, Start (av handshake).
 
-![EAP-TLS handshake](http://github.com/kjbekkelund/ttm4137/raw/master/media/eap-tls-handshake.png)
+![EAP-TLS handshake](https://github.com/kjbekkelund/ttm4137/raw/master/media/eap-tls-handshake.png)
 
 TLS settes opp mellom autentiseringsserver og Supplicant, og RADIUS brukes for å sende EAP-meldinger til autentiseringsserveren og får slik en kopi av master key.
 
@@ -377,7 +377,7 @@ Målet er å benytte eksisterende GSM-autentisering så uendret som mulig. Et pr
 
 Et sentralt problem er at det ikke er skikkelig gjensidig autentisering. Nettverket blir ikke eksplisitt autentisert, kun gjennom at det har lik SRES og Kc som mobilen beregner.
 
-![Meldingsflyt i EAP-SIM](http://github.com/kjbekkelund/ttm4137/raw/master/media/message-flow-eap-sim.png)
+![Meldingsflyt i EAP-SIM](https://github.com/kjbekkelund/ttm4137/raw/master/media/message-flow-eap-sim.png)
 
 Hva er forskjellen på pairwise- og gruppe-nøkler?
 --------------------------------------------------
@@ -477,7 +477,7 @@ Et Wi-Fi LAN-kort består av fire deler:
 
 Det er MAC-en som implementerer IEEE 802.11-protokollen. MAC ligger på en IC, rundt en mikroprosessor. 
 
-![TKIP](http://github.com/kjbekkelund/ttm4137/raw/master/media/tkip.png)
+![TKIP](https://github.com/kjbekkelund/ttm4137/raw/master/media/tkip.png)
 
 ### Integrity
 
@@ -506,7 +506,7 @@ Beskriv per-packet key mixing i TKIP
 
 Økningen i IV-lengde skapte problemer, siden legacy-systemer antok den gamle måten, altså en 24 bit IV, ikke 48 bit. De løste dette ved å dele den 48 bit lange IV-en i to deler. De første 16 bit paddes til 24 bit, og inkluderes som før. De resterende 32 mikses derimot med MAC-adressen, den temporære nøkkelen og de 16 bitene for å lage _per-packet key_-en.
 
-![Per-packet key mixing](http://github.com/kjbekkelund/ttm4137/raw/master/media/per-packet-key-mixing.png)
+![Per-packet key mixing](https://github.com/kjbekkelund/ttm4137/raw/master/media/per-packet-key-mixing.png)
 
 Hvorfor ble TKIP byttet ut med CCMP?
 ------------------------------------
@@ -524,7 +524,7 @@ På hvilken måte er TKIP forskjellig fra WEP?
 * Større IV.
 * Nøkkelstyring.
 
-![TKIP og WEP](http://github.com/kjbekkelund/ttm4137/raw/master/media/tkip-and-wep.png)
+![TKIP og WEP](https://github.com/kjbekkelund/ttm4137/raw/master/media/tkip-and-wep.png)
 
 Beskriv AES
 -----------
@@ -536,13 +536,13 @@ Beskriv operasjonsmodusen CCM
 
 En operasjonsmodus trengs når meldinger ikke er av spesifikk lengde. Må da definere en måte å konvertere dataen til en sekvens med blokker med gitt lengde før kryptering. CCMP benytter CCM (Counter Mode + CBC-MAC), som er basert på counter mode. 
 
-![Counter Mode](http://github.com/kjbekkelund/ttm4137/raw/master/media/countermode.png)
+![Counter Mode](https://github.com/kjbekkelund/ttm4137/raw/master/media/countermode.png)
 
 Siden counter mode endrer verdi for hver blokk, vil cipher text endres selv om dataen krypteres med samme nøkkel. Initialisert fra en nonce, ikke fra 1, siden man da ville kunnet funnet tilbake til dataen. Kryptering og dekryptering er likt i counter mode. Grunnen til at man ikke brukte counter mode, er fordi den kun gir kryptering, ikke MIC. 
 
 I CCM benyttes CBC til å produsere en MIC, som kalles Message Authentication Code (MAC). Derav CBC-MAC.
 
-![CBC-MAC](http://github.com/kjbekkelund/ttm4137/raw/master/media/cbc-mac.png)
+![CBC-MAC](https://github.com/kjbekkelund/ttm4137/raw/master/media/cbc-mac.png)
 
 Nyttige features i CCM:
 
@@ -558,7 +558,7 @@ En Message Integrity Code (MIC) trengs for å garantere en meldings autensitet.
 Hvordan er MIC-en i CCMP regnet ut?
 -----------------------------------
 
-![MIC i CCMP](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-mic.png)
+![MIC i CCMP](https://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-mic.png)
 
 Første blokk bruker ikke data fra MPDU, men med en blokk bestående av nonce, flag og DLen. 
 
@@ -569,7 +569,7 @@ Første blokk bruker ikke data fra MPDU, men med en blokk bestående av nonce, f
 
 Første blokk til CBC-MAC:
 
-![CBC-MAC første blokk](http://github.com/kjbekkelund/ttm4137/raw/master/media/cbc-mac-first-block.png)
+![CBC-MAC første blokk](https://github.com/kjbekkelund/ttm4137/raw/master/media/cbc-mac-first-block.png)
 
 Hvorfor kan ikke packet number (PN) brukes som nonce i CCMP?
 ------------------------------------------------------------
@@ -581,11 +581,11 @@ Hvordan brukes CCMP i RSN?
 
 Rammeflyt gjennom CCMP:
 
-![Rammeflyt gjennom CCMP](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-mpdu.png)
+![Rammeflyt gjennom CCMP](https://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-mpdu.png)
 
 Steg i MPDU-prosessering:
 
-![Steg i MPDU-prosessering](http://github.com/kjbekkelund/ttm4137/raw/master/media/steps-mpdu.png)
+![Steg i MPDU-prosessering](https://github.com/kjbekkelund/ttm4137/raw/master/media/steps-mpdu.png)
 
 CCMP headeren sendes ukryptert. Totalt 8 bytes fordelt på:
 
@@ -593,19 +593,19 @@ CCMP headeren sendes ukryptert. Totalt 8 bytes fordelt på:
 * 1 byte nøkkel-id. Informasjon om hvilken gruppenøkkel som skal brukes ved multikast.
 * 1 byte reservert.
 
-![CCMP header](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-header.png)
+![CCMP header](https://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-header.png)
 
 Kryptering og dekryptering:
 
-![Kryptering og dekryptering](http://github.com/kjbekkelund/ttm4137/raw/master/media/encrypt-decrypt-ccmp.png)
+![Kryptering og dekryptering](https://github.com/kjbekkelund/ttm4137/raw/master/media/encrypt-decrypt-ccmp.png)
 
 CCMP-kryptering:
 
-![CCMP-kryptering](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-encryption.png)
+![CCMP-kryptering](https://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-encryption.png)
 
 Steg i CCMP-kryptering:
 
-![Steg i CCMP-kryptering](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-encryption-stages.png)
+![Steg i CCMP-kryptering](https://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-encryption-stages.png)
 
 Et essensielt steg i krypteringen er å initialisere counteren, slik at den ikke får en verdi som har blitt brukt før. Lages på nesten samme måte som nonce til MIC-en, men bruker en Ctr (Counter) istedenfor DLen. Ctr begynner å telle på 1, og er 16 bit. Dermed unik for enhver melding med færre enn 65536 blokker.
 
@@ -616,14 +616,14 @@ Dekryptering:
 * Dekrypterer ved bruk av AES i counter-mode.
 * Sjekker MIC mot mottatte felt
 
-![CCMP Crypto](http://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-crypto.png)
+![CCMP Crypto](https://github.com/kjbekkelund/ttm4137/raw/master/media/ccmp-crypto.png)
 
 Hvordan er UMTS bygd opp?
 -------------------------
 
-![UMTS-arkitektur](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts.png)
+![UMTS-arkitektur](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts.png)
 
-![UMTS-arkitektur 2](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-architecture.png)
+![UMTS-arkitektur 2](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-architecture.png)
 
 Beskriv Man-in-the-Middle-angrepet på UMTS
 ------------------------------------------
@@ -637,11 +637,11 @@ For å gjøre et MitM-angrep må angriperen imitere et gyldig nettverk. Ved kun 
 
 Autentisering og nøkkelenighet med UMTS:
 
-![Authentication and key agreement in standard UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/auth-and-key-agreement-umts.png)
+![Authentication and key agreement in standard UMTS](https://github.com/kjbekkelund/ttm4137/raw/master/media/auth-and-key-agreement-umts.png)
 
 Autentisering og nøkkelenighet med GSM-komponenter:
 
-![Authentication and key agreement in UMTS with GSM components](http://github.com/kjbekkelund/ttm4137/raw/master/media/auth-and-key-agreement-umts-with-gsm.png)
+![Authentication and key agreement in UMTS with GSM components](https://github.com/kjbekkelund/ttm4137/raw/master/media/auth-and-key-agreement-umts-with-gsm.png)
 
 ### Gjennomføring
 
@@ -653,11 +653,11 @@ Tre deler:
 
 Hente AUTN:
 
-![Obtain valid AUTN](http://github.com/kjbekkelund/ttm4137/raw/master/media/obtain-valid-autn.png)
+![Obtain valid AUTN](https://github.com/kjbekkelund/ttm4137/raw/master/media/obtain-valid-autn.png)
 
 Være basestasjon:
 
-![Impersonate valid GSM base station](http://github.com/kjbekkelund/ttm4137/raw/master/media/impersonate-valid-gsm.png)
+![Impersonate valid GSM base station](https://github.com/kjbekkelund/ttm4137/raw/master/media/impersonate-valid-gsm.png)
 
 Dette angrepet gjør det ikke mulig for angriperen å skape en kobling mellom MS og en ekte basestasjon, og for å få en "vanlig" kobling må angriperen lage en kobling til et ekte nettverk for å videresende trafikk.
 
@@ -687,7 +687,7 @@ Algoritmekrav:
 Hva er de forskjellige sikkerhetsfunksjonene i GSM?
 ---------------------------------------------------
 
-![Kryptografisk funksjonalitet i GSM](http://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-crypto.png)
+![Kryptografisk funksjonalitet i GSM](https://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-crypto.png)
 
 * Authentication function (A3) and Key generating function (A8) inside SIMs and AuC
 * (Pseudo) random number generator (PRG) at AuC
@@ -704,18 +704,18 @@ Det lages også en temporær sesjonsnøkkel Kc (64 bit), som genereres av enveis
 
 (An AuC will produce a batch of triplets for a MS, each entry with a different RAND, all at once and pass these for distribution to the associated HLR of the same HPLMN. _n_ av disse sendes så til serving PLMN på forespørsel. The serving PLMN is allowed to re-use triplets if it cannot obtain more from the HPLMN.) If the SIM is authenticated, the VLR passes Kc from the triplet to the serving BS. Then SIM passes Kc to the ME and as a result the BS and the ME can begin ci- phering communication using Kc and the A5 algorithm
 
-![Autentisering i GSM](http://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-authentication.png)
+![Autentisering i GSM](https://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-authentication.png)
 
 Autentisering av besøkende:
 
-![Autentisering av besøkende i GSM](http://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-visitor-authentication.png)
+![Autentisering av besøkende i GSM](https://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-visitor-authentication.png)
 
 Hvordan krypteres informasjonen som sendes i GSM?
 -------------------------------------------------
 
 Kc blir etablert i autentiseringen. Er 64 bit, men 10 bit er 0, altså kun 54 effektive bit. Denne brukes sammen med krypteringsalgoritmen A5, som ligger i basestasjonen og ME (Mobile Equipment). Kan ikke ligge i SIM, siden den krever mer hastighet. (The frame counter, normally used for synchronisation at layer 1, is used with an expanded length as an input to the key stream generator.)
 
-![Kryptering i GSM](http://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-encryption.png)
+![Kryptering i GSM](https://github.com/kjbekkelund/ttm4137/raw/master/media/gsm-encryption.png)
 
 I GPRS er A5 byttes ut med GEA (GRPS Encryption Algorithm). Dette ble gjort siden termineringspunktet for kryptering ble flyttet dypere i nettverket, fra basestasjonen til SGSN. I GSM gjøres kryptering på det _fysiske laget_, mens det i GPRS gjøres på det _logiske link-laget_ (LLC, lag 3).
 
@@ -747,11 +747,11 @@ Når 3G introduserer skiftes det fra TDMA til WCDMA. Kravene til aksess-sikkerhe
 
 Hvor i protokoll-stakken integritet- og kryptering skjer:
 
-![UMTS protokollstakk](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-protocol-stack.png)
+![UMTS protokollstakk](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-protocol-stack.png)
 
 ### Gjensidig autentisering
 
-![Gjensidig autentisering i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/mutual-auth-umts.png)
+![Gjensidig autentisering i UMTS](https://github.com/kjbekkelund/ttm4137/raw/master/media/mutual-auth-umts.png)
 
 UEs sjekk av SN gjøres ved hjelp av AUTN. Master-nøkkel er 128 bit, hemmelig, og delt mellom UE og AuC. I tillegg til autentisering utledes temporære 128 bits nøkler til kryptering og integritetssjekk. UE verifiserer at AuC har generert AUTN ved å gjøre beregninger på AUTN og RAND. Nøklene til RAN-kryptering og -intergritetssjekk (CK og IK) lages også i autentiseringsprosessen. Det er i RNC at kryptering og integritetsbeskyttelse starter. 
 
@@ -767,13 +767,13 @@ UEs sjekk av SN gjøres ved hjelp av AUTN. Master-nøkkel er 128 bit, hemmelig, 
 * 48 bits SQN
 * AUTN = SQN ⊕ AK || AMF || MAC
 
-![Generering av autentiseringsvektor i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-autentication-vector.png)
+![Generering av autentiseringsvektor i UMTS](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-autentication-vector.png)
 
 ### Autentisering hos USIM
 
 Samme funksjoner f1-f5. 
 
-![Autentisering hos USIM](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-authentication-handling-usim.png)
+![Autentisering hos USIM](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-authentication-handling-usim.png)
 
 Dersom XMAC og MAC er lik, impliserer det at RAND og AUTN ble laget av samme entitet som vet K, altså AuC.
 
@@ -810,7 +810,7 @@ Etter resynkronisering vil UE kunne autentiseres. Dersom flere autentiseringsfor
 
 ### Flow chart
 
-![UMTS-autentisering](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-authentication-flowchart.png)
+![UMTS-autentisering](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-authentication-flowchart.png)
 
 ### Temporære identiteter
 
@@ -818,7 +818,7 @@ SN har oversikt over IMSI og TMSI for hver bruker, der IMSI er global for bruker
 
 ### Kryptering av UTRAN
 
-![Kryptering, UTRAN](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-utran-encryption.png)
+![Kryptering, UTRAN](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-utran-encryption.png)
 
 Før kryptering starter må enhetene bli enig om algoritme. Kun én definert i UMTS 1999, jobbes mot å definere én til.
 
@@ -826,7 +826,7 @@ Kryptering og dekryptering gjøres i UE og RNC (Radio Network Controller). Alts�
 
 UMTS kryptering gjøres ved et stream-cipher. Dekryptering er samme algoritme.
 
-![UMTS, stream cipher](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-stream-cipher.png)
+![UMTS, stream cipher](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-stream-cipher.png)
 
 Krypteringsparametre:
 
@@ -849,7 +849,7 @@ Protokollstruktur:
 
 Målet er å autentisere individuelle kontrollmeldinger. Stenger for man-in-the-middle. Implementert på RRC-laget, altså mellom UE og RNC. Basert på en message autentication code. Er 32 bit og laget ved å benytte f9. KASUMI kan også benyttes. Meldinger som sendes før IK er på plass er ikke integritetsbeskyttet. 
 
-![MAC i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-mac.png)
+![MAC i UMTS](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-mac.png)
 
 Integritetssjekk gjøres ikke på brukerplanet, men det gjøres en periodisk lokal autentisering. Initialiseres av RNC når COUNT-C når en viss kritisk verdi. Sender da en _counter check_ som inneholder mest signifikante del av COUNT-C. UE sammenligner med sin egen COUNT-C. Differanse reporteres tilbake. Dersom det er forskjell, kan RNC kutte koblingen. Dette gir beskyttelse mot en angriper som prøver å sette inn eller slette datapakker. 
 
@@ -861,7 +861,7 @@ RNC er felles for både PS- og CS-domenet, altså trengs ikke forskjellig algori
 
 ### Sammendrag
 
-![Sammendrag av aksess-sikkerhet i UMTS](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-access-security-summary.png)
+![Sammendrag av aksess-sikkerhet i UMTS](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-access-security-summary.png)
 
 Beskriv hvordan GSM samvirker med UMTS
 --------------------------------------
@@ -876,7 +876,7 @@ Entiteter, 2G vs 3G:
 * Serving CN. SN VLR/SGNS er 2G dersom den kun støtter GSM autentisering. 
 * Hjemmenettverk. 2G dersom det kun støtter triplet, 3G dersom det støtter kvintett.
 
-![Interworking](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-gsm-interworking.png)
+![Interworking](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-gsm-interworking.png)
 
 Tilfeller:
 
@@ -903,7 +903,7 @@ En plaintext MAP-melding krypteres og puttes i en annen MAP-melding sammen med e
 
 Basiselementet i automatisk nøkkelhåndtering i MAPsec er Key Administration Center (KAC). Disse blir enige om SA-er ved å benytte Internet Key Exchange (IKE). KAC-er distribuerer SA-er til NE. Det er nettverk, ikke individuelle NE-er, som adresseres av MAP-meldinger. 
 
-![MAPsec](http://github.com/kjbekkelund/ttm4137/raw/master/media/mapsec.png)
+![MAPsec](https://github.com/kjbekkelund/ttm4137/raw/master/media/mapsec.png)
 
 Tre beskyttelsesmoduser: Ingen sikkerhet, kun integritetsbeskyttelse, og kryptering og integritetsbeskyttelse. Sistnevnte har følgende struktur: sikkerhetsheader || f6(plaintext) || f7(sikkerhetsheader || f6(plaintext)), der f6 er AES i counter-mode og f7 er AES i CBC-MAC-mode. I alle tre tilfeller består meldingen av en sikkerhetsheader og en beskyttet payload. Sikkerhetsheader består av SPI (Security Parameter Index) og PLMN (Public Land Mobile Network), som sammen viser til en unik MAPsec SA. I tillegg inneholder den _Original Component ID_, som refererer til typen til den originale MAP-meldingen; TVP (Time Variant Parameter) som gir beskyttelse mot replay-angrep; NE-ID som identifiserer nettverkselementet som sender meldingen; og Prop som er et proprietært felt for lokal bruk.
 
@@ -924,7 +924,7 @@ Tre moduser:
 
 (RLC = Radio Link Control)
 
-![f8 flow](http://github.com/kjbekkelund/ttm4137/raw/master/media/f8-flow.png)
+![f8 flow](https://github.com/kjbekkelund/ttm4137/raw/master/media/f8-flow.png)
 
 Input:
 
@@ -941,7 +941,7 @@ Beskriv f8 i UMTS
 
 Benytter KASUMI i en blanding av counter- og OFB-modus, men en _pre-whitening_ av feedback-data.
 
-![f8](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-f8-2.png)
+![f8](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-f8-2.png)
 
 Benytter to 64 bit-registre: det statiske registeret A og telleren BLKCNT. 
 
@@ -952,7 +952,7 @@ f8 benytter en Key Modifier (KM)-konstant som er satt lik 01010101 repetert 16 g
 
 Algoritmen starter med at en enkelt operasjon av KASUMI gjøres på registeret A, ved å bruke en modifisert versjon av CK. Dette gir _pre-whitening_-verdien. Fordeler: gir bedre beskyttelse mot chosen plaintext-angrep og kollisjonsangrep. 
 
-![Pre-whitening](http://github.com/kjbekkelund/ttm4137/raw/master/media/pre-whitening-f8.png)
+![Pre-whitening](https://github.com/kjbekkelund/ttm4137/raw/master/media/pre-whitening-f8.png)
 
 Kryptering og dekryptering er identisk.
 
@@ -970,7 +970,7 @@ Hva er kravene til integritetsalgoritmen i UMTS?
 
 Benytter funksjonen f9, som må være fullt standardisert. Benyttes mellom UE og RNC og å beskytte dataintegritet, samt å autentisere hvor signaleringsdata kommer fra på RRC-laget. Må kunne implementeres i software og hardware.
 
-![f9 flow](http://github.com/kjbekkelund/ttm4137/raw/master/media/f9-flow.png)
+![f9 flow](https://github.com/kjbekkelund/ttm4137/raw/master/media/f9-flow.png)
 
 Genererer MAC av bestemt lengde, 32 bit.
 
@@ -989,17 +989,17 @@ Beskriv f9 i UMTS
 
 Benytter KASUMI i en form for CBC-MAC-modus (Endringen er at alle mellomliggende blokker XOR-es sammen, før en endelig KASUMI-operasjon gjøres på den samlede blokken).
 
-![f9](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-f9.png)
+![f9](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-f9.png)
 
-![f9](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-f9-2.png)
+![f9](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-f9-2.png)
 
 f9 benytter to 64 bit registre, A og B, som begge initialiseres til 0. Brukes også en 128 bit KM, som er lik 10101010 repetert 16 ganger.
 
 * PS = COUNT (32 bit) || FRESH (32 bit) || MESSAGE || DIRECTION (1 bit) || 1 || 0...0 (0-63 bit)
 * PS = PS0 || PS1 || ... || PSx
 
-![A](http://github.com/kjbekkelund/ttm4137/raw/master/media/a-f9.png) 
-![B](http://github.com/kjbekkelund/ttm4137/raw/master/media/b-f9.png)
+![A](https://github.com/kjbekkelund/ttm4137/raw/master/media/a-f9.png) 
+![B](https://github.com/kjbekkelund/ttm4137/raw/master/media/b-f9.png)
 
 Hovedgrunnen til at ikke standard CBC ble valgt, var på grunn av den korte blokklengden i KASUMI. Har nå 128 bit intern tilstand. 
 
@@ -1026,35 +1026,35 @@ Hvordan genereres kvintetten i AuC?
 
 RAND genereres med f0. 
 
-![Generering av kvintett](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-quintet.png)
+![Generering av kvintett](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-quintet.png)
 
 Hvordan skjer autentisering og utledelse av nøkkel i USIM?
 ----------------------------------------------------------
 
 Mottar (RAND, AUTN).
 
-![AKA i USIM](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-usim-aka.png)
+![AKA i USIM](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-usim-aka.png)
 
 Hvordan genereres resynkroniseringstegnet i USIM?
 -------------------------------------------------
 
 AMF* er default verdi i resynkronisering.
 
-![Generering av resynkroniseringstegn](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-resynchronization-token.png)
+![Generering av resynkroniseringstegn](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-resynchronization-token.png)
 
 Hvordan gjøres resynkronisering i HLR/AuC?
 ------------------------------------------
 
 Mottar (AUTS, RAND)
 
-![Resynkronisering](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-resync-auc.png)
+![Resynkronisering](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-resync-auc.png)
 
 Hva er MILENAGE?
 ----------------
 
 Rammeverk for algoritmer. Blokk cipher-kryptering med 128 bit input, 128 bit nøkkel og 128 bit output. I tillegg har det en 128 bit OP, slik at operator kan legge til en ekstra algoritme-konfigurasjon. 128 bits konstant ci har (default) verdier [0, 1, 2, 4, 8], ellers 0. r = [64, 0, 32, 64, 96]
 
-![MILENAGE](http://github.com/kjbekkelund/ttm4137/raw/master/media/milenage.png)
+![MILENAGE](https://github.com/kjbekkelund/ttm4137/raw/master/media/milenage.png)
 
 MILENAGE kunne lages enten ved å benytte et block cipher eller ved å bruke hash-funksjoner. Valgte blokk cipher. Grunner:
 
@@ -1084,13 +1084,13 @@ To SIP-prosedyrer spiller en sentral rolle i IMS-sikkerhet: REGISTER og INVITE. 
 
 Før en bruker kan benytte IMS-tjenester må hun aktive registrere seg. Dette gjøres ved å sende en REGISTER til en P-CSCF. REGISTER inneholder både IMPI og minst en IMPU. Når registrering er satt opp deler UE og P-CSCF IPsec ESP SA-er som kan benyttes til å beskytte den videre kommunikasjonen.
 
-![SIP-registrering](http://github.com/kjbekkelund/ttm4137/raw/master/media/sip-register.png)
+![SIP-registrering](https://github.com/kjbekkelund/ttm4137/raw/master/media/sip-register.png)
 
 ### Bruken av HTTP Digest AKA
 
 Gjensidig autentisering og nøkkel-enighet (3GPP AKA) gjøres på toppen av HTTP Digest, som er basert på delt passord. 3GPP AKA er ikke basert på delt passord mellom UE og P-CSCF, men permanent delt hemmelighet mellom UE og HSS. Bruker RAND og AUTN som nonce, og RES kalkulert fra RAND som passord. AKA indikeres i algoritme-valget. 
 
-![HTTP Digest](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-http-digest.png)
+![HTTP Digest](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-http-digest.png)
 
 ### Oppsett av sikkerhetsmodus
 
@@ -1100,7 +1100,7 @@ Et åpenbart angrep er å forhindre at mekasismene aktiveres i det hele tatt, fo
 
 Security agreement message flow:
 
-![Security agreement message flow](http://github.com/kjbekkelund/ttm4137/raw/master/media/umts-security-agreement-flow.png)
+![Security agreement message flow](https://github.com/kjbekkelund/ttm4137/raw/master/media/umts-security-agreement-flow.png)
 
 Tre SIP-headere definert med tanke på sikkerhet. Security-Client, Security-Server og Security-Verify. Fem sikkerhetsmekanismer som kan forhandles: TLS, HTTP Digest, IPsec med IKE, IPsec uten IKE, IPsec ESP for å beskytte første IMS-hopp.
 
@@ -1165,7 +1165,7 @@ Tradisjonell sikkerhetsarkitektur
 
 The traditional approach for network security is to divide the network into two zones: trusted and untrusted. There is no need for network security protection within the trusted zone because there are no enemies present. By contrast, you regard the untrusted zone as full of enemies.
 
-![Conventional Security Architecture](http://github.com/kjbekkelund/ttm4137/raw/master/media/conventional-security-architecture.png)
+![Conventional Security Architecture](https://github.com/kjbekkelund/ttm4137/raw/master/media/conventional-security-architecture.png)
 
 How does Wi-Fi LAN fit into this conventional security architecture?
 
@@ -1268,7 +1268,7 @@ Forklar MAC (header) i IEEE 802.11
 
 MAC-headeren er en del av det generelle formatet på rammer i IEEE 802.11.
 
-![Generelt format på rammer i IEEE 802.11](http://github.com/kjbekkelund/ttm4137/raw/master/media/basic-frame-format-802-11.png)
+![Generelt format på rammer i IEEE 802.11](https://github.com/kjbekkelund/ttm4137/raw/master/media/basic-frame-format-802-11.png)
 
 Tre typer basert på om det er snakk om en kontrollramme, styringsramme eller dataramme. Viktigste del: adresser. 6 byte per adresse. Hver enhet har en unik adresse spesifisert under produksjon. Destinasjon kan være unikast eller multikast.
 
